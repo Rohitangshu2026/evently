@@ -38,3 +38,7 @@ application-local.properties
 # OS
 .DS_Store
 Thumbs.db
+
+# Exception: deliberately committed DEV-ONLY JWT signing keys so the project
+# runs out of the box. See backend/src/main/resources/keys/README.md.
+!backend/src/main/resources/keys/*.pem
