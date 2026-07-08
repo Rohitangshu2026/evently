@@ -1,0 +1,23 @@
+# Local dev infrastructure for the Evently backend.
+# Postgres only — auth is handled in-app via custom JWT (no Keycloak).
+services:
+  postgres:
+    image: postgres:16
+    container_name: evently-postgres
+    environment:
+      POSTGRES_DB: evently
+      POSTGRES_USER: evently
+      POSTGRES_PASSWORD: evently
+    # Host 5432 (Homebrew postgres) and 5433 (another project) are taken; use 55432.
+    ports:
+      - "55432:5432"
+    volumes:
+      - evently-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U evently -d evently"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  evently-pgdata:
