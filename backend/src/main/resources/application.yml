@@ -13,6 +13,9 @@ spring:
     properties:
       hibernate:
         format_sql: true
+        # Fetch lazy collections (e.g. event.ticketTypes) in IN-clause batches
+        # instead of one query per row when mapping paged results.
+        default_batch_fetch_size: 20
   flyway:
     enabled: true
     baseline-on-migrate: false
