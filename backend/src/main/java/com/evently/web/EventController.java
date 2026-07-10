@@ -41,7 +41,7 @@ public class EventController {
     private final EventService eventService;
 
     /** @param eventService organizer event operations */
-    public EventController(EventService eventService) {
+    public EventController(EventService eventService){
         this.eventService = eventService;
     }
 
@@ -54,7 +54,7 @@ public class EventController {
      */
     @PostMapping
     public ResponseEntity<EventDetailsResponse> create(@AuthenticationPrincipal AuthPrincipal principal,
-                                                       @Valid @RequestBody CreateEventRequest request) {
+                                                       @Valid @RequestBody CreateEventRequest request){
         EventDetailsResponse created = eventService.create(principal.userId(), request);
         return ResponseEntity
                 .created(URI.create("/api/v1/events/" + created.id()))
@@ -71,7 +71,7 @@ public class EventController {
     @GetMapping
     public Page<EventSummaryResponse> list(@AuthenticationPrincipal AuthPrincipal principal,
                                            @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC)
-                                           Pageable pageable) {
+                                           Pageable pageable){
         return eventService.list(principal.userId(), pageable);
     }
 
@@ -84,7 +84,7 @@ public class EventController {
      */
     @GetMapping("/{id}")
     public EventDetailsResponse get(@AuthenticationPrincipal AuthPrincipal principal,
-                                    @PathVariable UUID id) {
+                                    @PathVariable UUID id){
         return eventService.get(principal.userId(), id);
     }
 
@@ -99,7 +99,7 @@ public class EventController {
     @PutMapping("/{id}")
     public EventDetailsResponse update(@AuthenticationPrincipal AuthPrincipal principal,
                                        @PathVariable UUID id,
-                                       @Valid @RequestBody UpdateEventRequest request) {
+                                       @Valid @RequestBody UpdateEventRequest request){
         return eventService.update(principal.userId(), id, request);
     }
 
@@ -113,7 +113,7 @@ public class EventController {
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@AuthenticationPrincipal AuthPrincipal principal,
-                       @PathVariable UUID id) {
+                       @PathVariable UUID id){
         eventService.delete(principal.userId(), id);
     }
 }

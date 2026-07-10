@@ -14,5 +14,5 @@ public record CookieProperties(
         String refreshName,
         boolean secure,
         String sameSite
-) {
+){
 }

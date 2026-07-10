@@ -14,5 +14,5 @@ import java.util.UUID;
  * @param email  the user's email
  * @param roles  the user's roles (also reflected as {@code ROLE_*} authorities)
  */
-public record AuthPrincipal(UUID userId, String email, Set<RoleEnum> roles) {
+public record AuthPrincipal(UUID userId, String email, Set<RoleEnum> roles){
 }

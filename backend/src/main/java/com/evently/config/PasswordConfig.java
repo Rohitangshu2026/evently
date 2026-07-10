@@ -19,7 +19,7 @@ public class PasswordConfig {
      * @return the Argon2id-based {@link PasswordEncoder}
      */
     @Bean
-    public PasswordEncoder passwordEncoder() {
+    public PasswordEncoder passwordEncoder(){
         return Argon2PasswordEncoder.defaultsForSpringSecurity_v5_8();
     }
 }

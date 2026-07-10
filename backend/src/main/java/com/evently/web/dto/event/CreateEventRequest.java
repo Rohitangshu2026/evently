@@ -31,5 +31,5 @@ public record CreateEventRequest(
         LocalDateTime salesEnd,
         @NotNull EventStatusEnum status,
         @NotEmpty List<@Valid CreateTicketTypeRequest> ticketTypes
-) {
+){
 }

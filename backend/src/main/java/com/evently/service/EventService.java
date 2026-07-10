@@ -45,7 +45,7 @@ public class EventService {
      */
     public EventService(EventRepository eventRepository,
                         UserRepository userRepository,
-                        EventMapper eventMapper) {
+                        EventMapper eventMapper){
         this.eventRepository = eventRepository;
         this.userRepository = userRepository;
         this.eventMapper = eventMapper;
@@ -59,7 +59,7 @@ public class EventService {
      * @return the created event, including generated ids and timestamps
      */
     @Transactional
-    public EventDetailsResponse create(UUID organizerId, CreateEventRequest request) {
+    public EventDetailsResponse create(UUID organizerId, CreateEventRequest request){
         validateDates(request.start(), request.end(), request.salesStart(), request.salesEnd());
 
         User organizer = userRepository.getReferenceById(organizerId);
@@ -73,7 +73,7 @@ public class EventService {
         event.setStatus(request.status());
         event.setOrganizer(organizer);
 
-        for (CreateTicketTypeRequest tt : request.ticketTypes()) {
+        for(CreateTicketTypeRequest tt : request.ticketTypes()){
             event.addTicketType(newTicketType(tt.name(), tt.price(), tt.description(), tt.totalAvailable()));
         }
 
@@ -89,7 +89,7 @@ public class EventService {
      * @return one page of event summaries
      */
     @Transactional(readOnly = true)
-    public Page<EventSummaryResponse> list(UUID organizerId, Pageable pageable) {
+    public Page<EventSummaryResponse> list(UUID organizerId, Pageable pageable){
         return eventRepository.findByOrganizerId(organizerId, pageable)
                 .map(eventMapper::toSummary);
     }
@@ -103,7 +103,7 @@ public class EventService {
      * @throws ResourceNotFoundException if the event doesn't exist or belongs to someone else
      */
     @Transactional(readOnly = true)
-    public EventDetailsResponse get(UUID organizerId, UUID eventId) {
+    public EventDetailsResponse get(UUID organizerId, UUID eventId){
         return eventMapper.toDetails(ownedEvent(organizerId, eventId));
     }
 
@@ -122,8 +122,8 @@ public class EventService {
      * @throws ResourceNotFoundException if the event isn't the organizer's
      */
     @Transactional
-    public EventDetailsResponse update(UUID organizerId, UUID eventId, UpdateEventRequest request) {
-        if (!eventId.equals(request.id())) {
+    public EventDetailsResponse update(UUID organizerId, UUID eventId, UpdateEventRequest request){
+        if(!eventId.equals(request.id())){
             throw new BadRequestException("Event id in the path and body must match.");
         }
         validateDates(request.start(), request.end(), request.salesStart(), request.salesEnd());
@@ -150,13 +150,13 @@ public class EventService {
      * @throws ResourceNotFoundException if the event isn't the organizer's
      */
     @Transactional
-    public void delete(UUID organizerId, UUID eventId) {
+    public void delete(UUID organizerId, UUID eventId){
         Event event = ownedEvent(organizerId, eventId);
         eventRepository.delete(event);
     }
 
     /** Loads an event scoped to its owner, or 404s. */
-    private Event ownedEvent(UUID organizerId, UUID eventId) {
+    private Event ownedEvent(UUID organizerId, UUID eventId){
         return eventRepository.findByIdAndOrganizerId(eventId, organizerId)
                 .orElseThrow(() -> new ResourceNotFoundException("Event not found."));
     }
@@ -166,18 +166,18 @@ public class EventService {
      * remove). Works on the managed collection so JPA's cascade and orphan
      * removal turn the diff into the right SQL.
      */
-    private void reconcileTicketTypes(Event event, List<UpdateTicketTypeRequest> requested) {
+    private void reconcileTicketTypes(Event event, List<UpdateTicketTypeRequest> requested){
         Map<UUID, TicketType> existingById = new HashMap<>();
-        for (TicketType tt : event.getTicketTypes()) {
+        for(TicketType tt : event.getTicketTypes()){
             existingById.put(tt.getId(), tt);
         }
 
-        for (UpdateTicketTypeRequest tt : requested) {
-            if (tt.id() == null) {
+        for(UpdateTicketTypeRequest tt : requested){
+            if(tt.id() == null){
                 event.addTicketType(newTicketType(tt.name(), tt.price(), tt.description(), tt.totalAvailable()));
             } else {
                 TicketType existing = existingById.remove(tt.id());
-                if (existing == null) {
+                if(existing == null){
                     throw new BadRequestException("Unknown ticket type id: " + tt.id());
                 }
                 existing.setName(tt.name());
@@ -188,13 +188,13 @@ public class EventService {
         }
 
         // Whatever wasn't referenced in the request gets removed (orphanRemoval).
-        for (TicketType leftover : existingById.values()) {
+        for(TicketType leftover : existingById.values()){
             event.removeTicketType(leftover);
         }
     }
 
     private TicketType newTicketType(String name, java.math.BigDecimal price,
-                                     String description, Integer totalAvailable) {
+                                     String description, Integer totalAvailable){
         TicketType ticketType = new TicketType();
         ticketType.setName(name);
         ticketType.setPrice(price);
@@ -205,11 +205,11 @@ public class EventService {
 
     /** Rejects date ranges that end before they start. */
     private void validateDates(LocalDateTime start, LocalDateTime end,
-                               LocalDateTime salesStart, LocalDateTime salesEnd) {
-        if (start != null && end != null && end.isBefore(start)) {
+                               LocalDateTime salesStart, LocalDateTime salesEnd){
+        if(start != null && end != null && end.isBefore(start)){
             throw new BadRequestException("Event end must be after its start.");
         }
-        if (salesStart != null && salesEnd != null && salesEnd.isBefore(salesStart)) {
+        if(salesStart != null && salesEnd != null && salesEnd.isBefore(salesStart)){
             throw new BadRequestException("Sales end must be after sales start.");
         }
     }

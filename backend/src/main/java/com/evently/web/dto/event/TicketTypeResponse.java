@@ -19,5 +19,5 @@ public record TicketTypeResponse(
         BigDecimal price,
         String description,
         Integer totalAvailable
-) {
+){
 }

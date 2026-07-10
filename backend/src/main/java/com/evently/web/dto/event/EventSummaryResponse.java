@@ -30,5 +30,5 @@ public record EventSummaryResponse(
         LocalDateTime salesEnd,
         EventStatusEnum status,
         List<TicketTypeResponse> ticketTypes
-) {
+){
 }

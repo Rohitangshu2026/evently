@@ -20,5 +20,5 @@ public record JwtProperties(
         Duration refreshTtl,
         String privateKeyLocation,
         String publicKeyLocation
-) {
+){
 }

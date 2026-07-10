@@ -17,5 +17,5 @@ public record AuthResult(
         long expiresIn,
         String refreshToken,
         User user
-) {
+){
 }

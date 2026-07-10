@@ -15,13 +15,13 @@ public abstract class ApiException extends RuntimeException {
      * @param status  HTTP status to respond with
      * @param message client-safe error message
      */
-    protected ApiException(HttpStatus status, String message) {
+    protected ApiException(HttpStatus status, String message){
         super(message);
         this.status = status;
     }
 
     /** @return the HTTP status this exception maps to */
-    public HttpStatus getStatus() {
+    public HttpStatus getStatus(){
         return status;
     }
 }

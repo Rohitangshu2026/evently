@@ -19,7 +19,7 @@ public class EventlyApplication {
      *
      * @param args standard JVM command-line arguments
      */
-    public static void main(String[] args) {
+    public static void main(String[] args){
         SpringApplication.run(EventlyApplication.class, args);
     }
 }

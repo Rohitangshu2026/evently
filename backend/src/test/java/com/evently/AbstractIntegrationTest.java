@@ -31,7 +31,7 @@ public abstract class AbstractIntegrationTest {
      * @param registry Spring's dynamic property registry
      */
     @DynamicPropertySource
-    static void datasourceProperties(DynamicPropertyRegistry registry) {
+    static void datasourceProperties(DynamicPropertyRegistry registry){
         registry.add("spring.datasource.url", () -> "jdbc:postgresql://localhost:55432/evently_test");
         registry.add("spring.datasource.username", () -> "evently");
         registry.add("spring.datasource.password", () -> "evently");

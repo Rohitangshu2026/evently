@@ -6,5 +6,5 @@ package com.evently.web.error;
  *
  * @param error a human-readable, client-safe error message
  */
-public record ErrorResponse(String error) {
+public record ErrorResponse(String error){
 }

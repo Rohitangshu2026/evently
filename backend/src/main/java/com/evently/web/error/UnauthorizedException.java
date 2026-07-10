@@ -9,7 +9,7 @@ import org.springframework.http.HttpStatus;
 public class UnauthorizedException extends ApiException {
 
     /** @param message client-safe (non-revealing) error message */
-    public UnauthorizedException(String message) {
+    public UnauthorizedException(String message){
         super(HttpStatus.UNAUTHORIZED, message);
     }
 }

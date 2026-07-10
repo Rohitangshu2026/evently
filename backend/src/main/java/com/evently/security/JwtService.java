@@ -48,14 +48,14 @@ public class JwtService {
      * @param properties     JWT configuration (issuer, TTLs, key locations)
      * @param resourceLoader used to read the PEM key resources
      */
-    public JwtService(JwtProperties properties, ResourceLoader resourceLoader) {
+    public JwtService(JwtProperties properties, ResourceLoader resourceLoader){
         this.properties = properties;
         this.resourceLoader = resourceLoader;
     }
 
     /** Loads the Ed25519 keypair from the configured PEM resources. */
     @PostConstruct
-    void loadKeys() {
+    void loadKeys(){
         this.privateKey = loadPrivateKey(properties.privateKeyLocation());
         this.publicKey = loadPublicKey(properties.publicKeyLocation());
     }
@@ -66,7 +66,7 @@ public class JwtService {
      * @param user the authenticated user
      * @return a compact, signed JWT
      */
-    public String generateAccessToken(User user) {
+    public String generateAccessToken(User user){
         Instant now = Instant.now();
         Instant expiry = now.plus(properties.accessTtl());
         List<String> roles = user.getRoles().stream().map(Enum::name).collect(Collectors.toList());
@@ -90,7 +90,7 @@ public class JwtService {
      * @return the authenticated principal
      * @throws JwtException if the token is malformed, expired, or fails verification
      */
-    public AuthPrincipal parse(String token) {
+    public AuthPrincipal parse(String token){
         Claims claims = Jwts.parser()
                 .verifyWith(publicKey)
                 .requireIssuer(properties.issuer())
@@ -105,13 +105,13 @@ public class JwtService {
     }
 
     /** @return the configured access-token lifetime in seconds */
-    public long getAccessTtlSeconds() {
+    public long getAccessTtlSeconds(){
         return properties.accessTtl().toSeconds();
     }
 
     @SuppressWarnings("unchecked")
-    private Set<RoleEnum> toRoles(List<?> raw) {
-        if (raw == null) {
+    private Set<RoleEnum> toRoles(List<?> raw){
+        if(raw == null){
             return Set.of();
         }
         return ((List<String>) raw).stream()
@@ -119,26 +119,26 @@ public class JwtService {
                 .collect(Collectors.toSet());
     }
 
-    private PrivateKey loadPrivateKey(String location) {
+    private PrivateKey loadPrivateKey(String location){
         byte[] der = readDer(location);
         try {
             return KeyFactory.getInstance("Ed25519").generatePrivate(new PKCS8EncodedKeySpec(der));
-        } catch (Exception e) {
+        } catch(Exception e){
             throw new IllegalStateException("Unable to load JWT private key from " + location, e);
         }
     }
 
-    private PublicKey loadPublicKey(String location) {
+    private PublicKey loadPublicKey(String location){
         byte[] der = readDer(location);
         try {
             return KeyFactory.getInstance("Ed25519").generatePublic(new X509EncodedKeySpec(der));
-        } catch (Exception e) {
+        } catch(Exception e){
             throw new IllegalStateException("Unable to load JWT public key from " + location, e);
         }
     }
 
     /** Reads a PEM resource and returns its base64-decoded DER bytes. */
-    private byte[] readDer(String location) {
+    private byte[] readDer(String location){
         Resource resource = resourceLoader.getResource(location);
         try {
             String pem = new String(resource.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
@@ -147,7 +147,7 @@ public class JwtService {
                     .replaceAll("-----END (.*)-----", "")
                     .replaceAll("\\s", "");
             return Base64.getDecoder().decode(base64);
-        } catch (Exception e) {
+        } catch(Exception e){
             throw new IllegalStateException("Unable to read key resource " + location, e);
         }
     }

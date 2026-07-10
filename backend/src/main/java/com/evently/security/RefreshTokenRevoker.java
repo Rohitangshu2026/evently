@@ -25,7 +25,7 @@ public class RefreshTokenRevoker {
     private final RefreshTokenRepository repository;
 
     /** @param repository refresh-token persistence */
-    public RefreshTokenRevoker(RefreshTokenRepository repository) {
+    public RefreshTokenRevoker(RefreshTokenRepository repository){
         this.repository = repository;
     }
 
@@ -35,7 +35,7 @@ public class RefreshTokenRevoker {
      * @param family the family id to revoke
      */
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void revokeFamily(UUID family) {
+    public void revokeFamily(UUID family){
         List<RefreshToken> active = repository.findByFamilyAndRevokedAtIsNull(family);
         Instant now = Instant.now();
         active.forEach(token -> token.setRevokedAt(now));

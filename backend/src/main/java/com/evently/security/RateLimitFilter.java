@@ -42,7 +42,7 @@ public class RateLimitFilter extends OncePerRequestFilter {
      * @param properties   supplies the per-minute attempt allowance
      * @param objectMapper used to render the 429 error body
      */
-    public RateLimitFilter(RateLimitProperties properties, ObjectMapper objectMapper) {
+    public RateLimitFilter(RateLimitProperties properties, ObjectMapper objectMapper){
         this.attemptsPerMinute = properties.authAttemptsPerMinute();
         this.objectMapper = objectMapper;
     }
@@ -53,25 +53,25 @@ public class RateLimitFilter extends OncePerRequestFilter {
                                     @NonNull FilterChain filterChain)
             throws ServletException, IOException {
 
-        if (!isRateLimited(request)) {
+        if(!isRateLimited(request)){
             filterChain.doFilter(request, response);
             return;
         }
 
         Bucket bucket = buckets.computeIfAbsent(clientIp(request), ip -> newBucket());
-        if (bucket.tryConsume(1)) {
+        if(bucket.tryConsume(1)){
             filterChain.doFilter(request, response);
         } else {
             writeTooManyRequests(response);
         }
     }
 
-    private boolean isRateLimited(HttpServletRequest request) {
+    private boolean isRateLimited(HttpServletRequest request){
         return "POST".equalsIgnoreCase(request.getMethod())
                 && RATE_LIMITED_PATHS.contains(request.getRequestURI());
     }
 
-    private Bucket newBucket() {
+    private Bucket newBucket(){
         Bandwidth limit = Bandwidth.builder()
                 .capacity(attemptsPerMinute)
                 .refillGreedy(attemptsPerMinute, Duration.ofMinutes(1))
@@ -80,9 +80,9 @@ public class RateLimitFilter extends OncePerRequestFilter {
     }
 
     /** Resolves the client IP, honouring a single {@code X-Forwarded-For} hop. */
-    private String clientIp(HttpServletRequest request) {
+    private String clientIp(HttpServletRequest request){
         String forwarded = request.getHeader("X-Forwarded-For");
-        if (forwarded != null && !forwarded.isBlank()) {
+        if(forwarded != null && !forwarded.isBlank()){
             return forwarded.split(",")[0].trim();
         }
         return request.getRemoteAddr();

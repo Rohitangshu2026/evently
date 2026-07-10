@@ -48,7 +48,7 @@ public class AuthController {
      */
     public AuthController(AuthService authService,
                           CookieProperties cookieProperties,
-                          JwtProperties jwtProperties) {
+                          JwtProperties jwtProperties){
         this.authService = authService;
         this.cookieProperties = cookieProperties;
         this.jwtProperties = jwtProperties;
@@ -63,7 +63,7 @@ public class AuthController {
      */
     @PostMapping("/signup")
     public ResponseEntity<AuthResponse> signup(@Valid @RequestBody SignupRequest request,
-                                               HttpServletRequest httpRequest) {
+                                               HttpServletRequest httpRequest){
         AuthResult result = authService.signup(request, userAgent(httpRequest), clientIp(httpRequest));
         return authResponse(result, HttpStatus.CREATED);
     }
@@ -77,7 +77,7 @@ public class AuthController {
      */
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request,
-                                              HttpServletRequest httpRequest) {
+                                              HttpServletRequest httpRequest){
         AuthResult result = authService.login(request, userAgent(httpRequest), clientIp(httpRequest));
         return authResponse(result, HttpStatus.OK);
     }
@@ -89,7 +89,7 @@ public class AuthController {
      * @return 200 with a fresh access token; sets a rotated refresh cookie
      */
     @PostMapping("/refresh")
-    public ResponseEntity<AuthResponse> refresh(HttpServletRequest httpRequest) {
+    public ResponseEntity<AuthResponse> refresh(HttpServletRequest httpRequest){
         String rawRefresh = readRefreshCookie(httpRequest);
         AuthResult result = authService.refresh(rawRefresh, userAgent(httpRequest), clientIp(httpRequest));
         return authResponse(result, HttpStatus.OK);
@@ -102,7 +102,7 @@ public class AuthController {
      * @return 204 with a cleared refresh cookie
      */
     @PostMapping("/logout")
-    public ResponseEntity<Void> logout(HttpServletRequest httpRequest) {
+    public ResponseEntity<Void> logout(HttpServletRequest httpRequest){
         authService.logout(readRefreshCookie(httpRequest));
         return ResponseEntity.noContent()
                 .header(HttpHeaders.SET_COOKIE, clearRefreshCookie().toString())
@@ -116,13 +116,13 @@ public class AuthController {
      * @return 200 with the user's public profile
      */
     @GetMapping("/me")
-    public UserResponse me(@AuthenticationPrincipal AuthPrincipal principal) {
+    public UserResponse me(@AuthenticationPrincipal AuthPrincipal principal){
         User user = authService.currentUser(principal.userId());
         return UserResponse.from(user);
     }
 
     /** Builds the token response body and attaches the refresh cookie. */
-    private ResponseEntity<AuthResponse> authResponse(AuthResult result, HttpStatus status) {
+    private ResponseEntity<AuthResponse> authResponse(AuthResult result, HttpStatus status){
         AuthResponse body = new AuthResponse(
                 result.accessToken(),
                 "Bearer",
@@ -134,7 +134,7 @@ public class AuthController {
     }
 
     /** Creates the refresh cookie carrying the raw token. */
-    private ResponseCookie buildRefreshCookie(String rawToken) {
+    private ResponseCookie buildRefreshCookie(String rawToken){
         return ResponseCookie.from(cookieProperties.refreshName(), rawToken)
                 .httpOnly(true)
                 .secure(cookieProperties.secure())
@@ -145,7 +145,7 @@ public class AuthController {
     }
 
     /** Creates an expired, empty refresh cookie to clear it on logout. */
-    private ResponseCookie clearRefreshCookie() {
+    private ResponseCookie clearRefreshCookie(){
         return ResponseCookie.from(cookieProperties.refreshName(), "")
                 .httpOnly(true)
                 .secure(cookieProperties.secure())
@@ -156,25 +156,25 @@ public class AuthController {
     }
 
     /** Reads the raw refresh token from the request cookies, or {@code null}. */
-    private String readRefreshCookie(HttpServletRequest request) {
-        if (request.getCookies() == null) {
+    private String readRefreshCookie(HttpServletRequest request){
+        if(request.getCookies() == null){
             return null;
         }
-        for (Cookie cookie : request.getCookies()) {
-            if (cookieProperties.refreshName().equals(cookie.getName())) {
+        for(Cookie cookie : request.getCookies()){
+            if(cookieProperties.refreshName().equals(cookie.getName())){
                 return cookie.getValue();
             }
         }
         return null;
     }
 
-    private String userAgent(HttpServletRequest request) {
+    private String userAgent(HttpServletRequest request){
         return request.getHeader(HttpHeaders.USER_AGENT);
     }
 
-    private String clientIp(HttpServletRequest request) {
+    private String clientIp(HttpServletRequest request){
         String forwarded = request.getHeader("X-Forwarded-For");
-        if (forwarded != null && !forwarded.isBlank()) {
+        if(forwarded != null && !forwarded.isBlank()){
             return forwarded.split(",")[0].trim();
         }
         return request.getRemoteAddr();

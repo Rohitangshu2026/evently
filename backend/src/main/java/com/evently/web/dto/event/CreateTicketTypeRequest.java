@@ -20,5 +20,5 @@ public record CreateTicketTypeRequest(
         @NotNull @PositiveOrZero BigDecimal price,
         @NotBlank String description,
         @Positive Integer totalAvailable
-) {
+){
 }

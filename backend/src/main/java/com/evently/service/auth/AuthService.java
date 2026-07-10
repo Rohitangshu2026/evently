@@ -44,7 +44,7 @@ public class AuthService {
     public AuthService(UserRepository userRepository,
                        PasswordEncoder passwordEncoder,
                        JwtService jwtService,
-                       RefreshTokenService refreshTokenService) {
+                       RefreshTokenService refreshTokenService){
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
@@ -62,8 +62,8 @@ public class AuthService {
      * @throws ConflictException if the email is already registered
      */
     @Transactional
-    public AuthResult signup(SignupRequest request, String userAgent, String ip) {
-        if (userRepository.existsByEmail(request.email())) {
+    public AuthResult signup(SignupRequest request, String userAgent, String ip){
+        if(userRepository.existsByEmail(request.email())){
             throw new ConflictException("An account with that email already exists.");
         }
         User user = new User();
@@ -87,7 +87,7 @@ public class AuthService {
      *                               deliberately generic to avoid account enumeration)
      */
     @Transactional
-    public AuthResult login(LoginRequest request, String userAgent, String ip) {
+    public AuthResult login(LoginRequest request, String userAgent, String ip){
         User user = userRepository.findByEmail(request.email()).orElse(null);
 
         // Always run the (expensive) hash comparison — against a dummy hash when
@@ -96,7 +96,7 @@ public class AuthService {
         String hashToCheck = user != null ? user.getPasswordHash() : timingEqualizationHash;
         boolean passwordMatches = passwordEncoder.matches(request.password(), hashToCheck);
 
-        if (user == null || !passwordMatches) {
+        if(user == null || !passwordMatches){
             throw new UnauthorizedException("Invalid email or password.");
         }
         return issueTokens(user, userAgent, ip);
@@ -112,8 +112,8 @@ public class AuthService {
      * @throws UnauthorizedException if the refresh token is missing, expired, or reused
      */
     @Transactional
-    public AuthResult refresh(String rawRefreshToken, String userAgent, String ip) {
-        if (rawRefreshToken == null || rawRefreshToken.isBlank()) {
+    public AuthResult refresh(String rawRefreshToken, String userAgent, String ip){
+        if(rawRefreshToken == null || rawRefreshToken.isBlank()){
             throw new UnauthorizedException("You need to sign in to continue.");
         }
         RefreshTokenService.Rotation rotation = refreshTokenService.rotate(rawRefreshToken, userAgent, ip);
@@ -128,7 +128,7 @@ public class AuthService {
      * @param rawRefreshToken the raw token from the client's cookie (may be null)
      */
     @Transactional
-    public void logout(String rawRefreshToken) {
+    public void logout(String rawRefreshToken){
         refreshTokenService.revokeByRawToken(rawRefreshToken);
     }
 
@@ -140,13 +140,13 @@ public class AuthService {
      * @throws ResourceNotFoundException if the user no longer exists
      */
     @Transactional(readOnly = true)
-    public User currentUser(UUID userId) {
+    public User currentUser(UUID userId){
         return userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found."));
     }
 
     /** Mints an access token and issues a new refresh-token family for the user. */
-    private AuthResult issueTokens(User user, String userAgent, String ip) {
+    private AuthResult issueTokens(User user, String userAgent, String ip){
         String accessToken = jwtService.generateAccessToken(user);
         String refreshToken = refreshTokenService.issue(user, userAgent, ip);
         return new AuthResult(accessToken, jwtService.getAccessTtlSeconds(), refreshToken, user);

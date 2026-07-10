@@ -37,7 +37,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtService jwtService;
 
     /** @param jwtService verifies and parses access tokens */
-    public JwtAuthenticationFilter(JwtService jwtService) {
+    public JwtAuthenticationFilter(JwtService jwtService){
         this.jwtService = jwtService;
     }
 
@@ -48,7 +48,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
 
         String token = extractToken(request);
-        if (token != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+        if(token != null && SecurityContextHolder.getContext().getAuthentication() == null){
             try {
                 AuthPrincipal principal = jwtService.parse(token);
                 List<SimpleGrantedAuthority> authorities = principal.roles().stream()
@@ -58,7 +58,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 var authentication = new UsernamePasswordAuthenticationToken(principal, null, authorities);
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authentication);
-            } catch (Exception ex) {
+            } catch(Exception ex){
                 // Invalid/expired token: leave the context unauthenticated.
                 log.debug("Rejected access token: {}", ex.getMessage());
             }
@@ -68,9 +68,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     /** Extracts the raw JWT from the Authorization header, or {@code null}. */
-    private String extractToken(HttpServletRequest request) {
+    private String extractToken(HttpServletRequest request){
         String header = request.getHeader(HttpHeaders.AUTHORIZATION);
-        if (header != null && header.startsWith(BEARER_PREFIX)) {
+        if(header != null && header.startsWith(BEARER_PREFIX)){
             return header.substring(BEARER_PREFIX.length()).trim();
         }
         return null;

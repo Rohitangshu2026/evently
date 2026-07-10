@@ -9,7 +9,7 @@ import org.springframework.http.HttpStatus;
 public class ResourceNotFoundException extends ApiException {
 
     /** @param message client-safe description of what was not found */
-    public ResourceNotFoundException(String message) {
+    public ResourceNotFoundException(String message){
         super(HttpStatus.NOT_FOUND, message);
     }
 }

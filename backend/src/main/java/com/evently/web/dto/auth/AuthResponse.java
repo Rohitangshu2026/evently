@@ -14,5 +14,5 @@ public record AuthResponse(
         String tokenType,
         long expiresIn,
         UserResponse user
-) {
+){
 }

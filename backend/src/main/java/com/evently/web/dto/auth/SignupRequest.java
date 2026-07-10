@@ -19,5 +19,5 @@ public record SignupRequest(
         @NotBlank @Size(min = 8, max = 100) String password,
         @NotBlank String name,
         @NotNull RoleEnum role
-) {
+){
 }

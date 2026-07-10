@@ -20,14 +20,14 @@ public record UserResponse(
         String email,
         String name,
         Set<RoleEnum> roles
-) {
+){
     /**
      * Maps a {@link User} entity to its public view.
      *
      * @param user the entity
      * @return the response DTO
      */
-    public static UserResponse from(User user) {
+    public static UserResponse from(User user){
         return new UserResponse(user.getId(), user.getEmail(), user.getName(), user.getRoles());
     }
 }

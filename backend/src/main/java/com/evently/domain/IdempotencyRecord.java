@@ -52,14 +52,14 @@ public class IdempotencyRecord {
     private Instant createdAt;
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof IdempotencyRecord other)) return false;
+    public boolean equals(Object o){
+        if(this == o) return true;
+        if(!(o instanceof IdempotencyRecord other)) return false;
         return id != null && id.equals(other.id);
     }
 
     @Override
-    public int hashCode() {
+    public int hashCode(){
         return getClass().hashCode();
     }
 }

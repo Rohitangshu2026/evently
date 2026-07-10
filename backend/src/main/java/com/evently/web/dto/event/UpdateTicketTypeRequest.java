@@ -26,5 +26,5 @@ public record UpdateTicketTypeRequest(
         @NotNull @PositiveOrZero BigDecimal price,
         @NotBlank String description,
         @Positive Integer totalAvailable
-) {
+){
 }

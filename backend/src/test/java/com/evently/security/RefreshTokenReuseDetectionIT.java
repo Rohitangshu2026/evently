@@ -40,7 +40,7 @@ class RefreshTokenReuseDetectionIT extends AbstractIntegrationTest {
     private PasswordEncoder passwordEncoder;
 
     @Test
-    void reuseOfRotatedTokenRevokesEntireFamily() {
+    void reuseOfRotatedTokenRevokesEntireFamily(){
         User user = createUser();
 
         // Login issues token A in a fresh family.
@@ -62,7 +62,7 @@ class RefreshTokenReuseDetectionIT extends AbstractIntegrationTest {
                 .isInstanceOf(UnauthorizedException.class);
     }
 
-    private User createUser() {
+    private User createUser(){
         User user = new User();
         user.setEmail("reuse-" + UUID.randomUUID() + "@evently.test");
         user.setName("Reuse Test");
@@ -72,11 +72,11 @@ class RefreshTokenReuseDetectionIT extends AbstractIntegrationTest {
     }
 
     /** Mirrors {@link RefreshTokenService}'s token hashing so we can look tokens up. */
-    private String sha256Hex(String raw) {
+    private String sha256Hex(String raw){
         try {
             byte[] digest = MessageDigest.getInstance("SHA-256").digest(raw.getBytes(StandardCharsets.UTF_8));
             return HexFormat.of().formatHex(digest);
-        } catch (Exception e) {
+        } catch(Exception e){
             throw new IllegalStateException(e);
         }
     }

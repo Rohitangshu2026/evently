@@ -69,14 +69,14 @@ public class TicketType {
     private Instant updatedAt;
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof TicketType other)) return false;
+    public boolean equals(Object o){
+        if(this == o) return true;
+        if(!(o instanceof TicketType other)) return false;
         return id != null && id.equals(other.id);
     }
 
     @Override
-    public int hashCode() {
+    public int hashCode(){
         return getClass().hashCode();
     }
 }

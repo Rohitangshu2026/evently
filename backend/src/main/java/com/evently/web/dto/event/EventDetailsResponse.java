@@ -35,5 +35,5 @@ public record EventDetailsResponse(
         List<TicketTypeResponse> ticketTypes,
         Instant createdAt,
         Instant updatedAt
-) {
+){
 }

@@ -42,7 +42,7 @@ public class SecurityConfig {
      */
     public SecurityConfig(JwtService jwtService,
                           RateLimitProperties rateLimitProperties,
-                          ObjectMapper objectMapper) {
+                          ObjectMapper objectMapper){
         this.jwtService = jwtService;
         this.rateLimitProperties = rateLimitProperties;
         this.objectMapper = objectMapper;
@@ -82,14 +82,14 @@ public class SecurityConfig {
     }
 
     /** 401 handler for unauthenticated access to a protected resource. */
-    private AuthenticationEntryPoint unauthorizedEntryPoint() {
+    private AuthenticationEntryPoint unauthorizedEntryPoint(){
         return (request, response, authException) ->
                 writeError(response, HttpServletResponse.SC_UNAUTHORIZED,
                         "You need to sign in to continue.");
     }
 
     /** 403 handler for authenticated-but-forbidden access. */
-    private AccessDeniedHandler accessDeniedHandler() {
+    private AccessDeniedHandler accessDeniedHandler(){
         return (request, response, accessDeniedException) ->
                 writeError(response, HttpServletResponse.SC_FORBIDDEN,
                         "You don't have permission to perform that action.");

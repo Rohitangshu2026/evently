@@ -86,26 +86,26 @@ public class Event {
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
-    public void addTicketType(TicketType ticketType) {
+    public void addTicketType(TicketType ticketType){
         ticketTypes.add(ticketType);
         ticketType.setEvent(this);
     }
 
-    public void removeTicketType(TicketType ticketType) {
+    public void removeTicketType(TicketType ticketType){
         ticketTypes.remove(ticketType);
         ticketType.setEvent(null);
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Event other))
+    public boolean equals(Object o){
+        if(this == o) return true;
+        if(!(o instanceof Event other))
             return false;
         return id != null && id.equals(other.id);
     }
 
     @Override
-    public int hashCode() {
+    public int hashCode(){
         return getClass().hashCode();
     }
 }

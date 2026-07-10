@@ -41,7 +41,7 @@ public class RefreshTokenService {
      */
     public RefreshTokenService(RefreshTokenRepository repository,
                                RefreshTokenRevoker revoker,
-                               JwtProperties jwtProperties) {
+                               JwtProperties jwtProperties){
         this.repository = repository;
         this.revoker = revoker;
         this.jwtProperties = jwtProperties;
@@ -56,7 +56,7 @@ public class RefreshTokenService {
      * @return the raw refresh token to hand to the client
      */
     @Transactional
-    public String issue(User user, String userAgent, String ip) {
+    public String issue(User user, String userAgent, String ip){
         return persist(user, UUID.randomUUID(), null, userAgent, ip);
     }
 
@@ -70,18 +70,18 @@ public class RefreshTokenService {
      * @throws UnauthorizedException if the token is unknown, expired, or reused
      */
     @Transactional
-    public Rotation rotate(String rawToken, String userAgent, String ip) {
+    public Rotation rotate(String rawToken, String userAgent, String ip){
         RefreshToken current = repository.findByTokenHash(hash(rawToken))
                 .orElseThrow(() -> new UnauthorizedException("Invalid session. Please sign in again."));
 
-        if (current.isRevoked()) {
+        if(current.isRevoked()){
             // Reuse of a revoked token → likely theft. Nuke the whole family.
             // Done in a separate (REQUIRES_NEW) transaction so it survives the
             // rollback triggered by the exception we are about to throw.
             revoker.revokeFamily(current.getFamily());
             throw new UnauthorizedException("Session is no longer valid. Please sign in again.");
         }
-        if (current.isExpired()) {
+        if(current.isExpired()){
             throw new UnauthorizedException("Session expired. Please sign in again.");
         }
 
@@ -97,8 +97,8 @@ public class RefreshTokenService {
      *
      * @param rawToken the raw token from the client's cookie
      */
-    public void revokeByRawToken(String rawToken) {
-        if (rawToken == null || rawToken.isBlank()) {
+    public void revokeByRawToken(String rawToken){
+        if(rawToken == null || rawToken.isBlank()){
             return;
         }
         repository.findByTokenHash(hash(rawToken))
@@ -106,7 +106,7 @@ public class RefreshTokenService {
     }
 
     /** Creates and stores a new refresh-token row, returning its raw value. */
-    private String persist(User user, UUID family, UUID parentId, String userAgent, String ip) {
+    private String persist(User user, UUID family, UUID parentId, String userAgent, String ip){
         String raw = generateRawToken();
         RefreshToken token = new RefreshToken();
         token.setUser(user);
@@ -121,19 +121,19 @@ public class RefreshTokenService {
     }
 
     /** Generates a 256-bit, URL-safe random token. */
-    private String generateRawToken() {
+    private String generateRawToken(){
         byte[] bytes = new byte[32];
         secureRandom.nextBytes(bytes);
         return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
     }
 
     /** Returns the hex SHA-256 of a raw token (what we actually persist). */
-    private String hash(String rawToken) {
+    private String hash(String rawToken){
         try {
             byte[] digest = MessageDigest.getInstance("SHA-256")
                     .digest(rawToken.getBytes(StandardCharsets.UTF_8));
             return HexFormat.of().formatHex(digest);
-        } catch (NoSuchAlgorithmException e) {
+        } catch(NoSuchAlgorithmException e){
             throw new IllegalStateException("SHA-256 unavailable", e);
         }
     }
@@ -144,6 +144,6 @@ public class RefreshTokenService {
      * @param user     the token owner
      * @param rawToken the newly issued raw refresh token
      */
-    public record Rotation(User user, String rawToken) {
+    public record Rotation(User user, String rawToken){
     }
 }
