@@ -4,8 +4,13 @@ import com.evently.domain.QrCode;
 import com.evently.domain.Ticket;
 import com.evently.domain.enums.QrCodeStatusEnum;
 import com.evently.repo.QrCodeRepository;
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.client.j2se.MatrixToImageWriter;
+import com.google.zxing.common.BitMatrix;
+import com.google.zxing.qrcode.QRCodeWriter;
 import org.springframework.stereotype.Service;
 
+import java.io.ByteArrayOutputStream;
 import java.security.SecureRandom;
 import java.util.Base64;
 
@@ -44,6 +49,28 @@ public class QrCodeService {
         qrCode.setStatus(QrCodeStatusEnum.ACTIVE);
         qrCode.setValue(generateOpaqueValue());
         return qrCodeRepository.save(qrCode);
+    }
+
+    /**
+     * Renders a QR credential as a PNG image. Rendering is done on demand
+     * rather than stored: the image is a pure function of the value, so
+     * persisting bytes would only duplicate state.
+     *
+     * @param value  the opaque credential to encode
+     * @param sizePx edge length of the square image in pixels
+     * @return PNG bytes ready to serve as {@code image/png}
+     * @throws IllegalStateException if ZXing fails to encode (never expected
+     *                               for our fixed-size base64url payloads)
+     */
+    public byte[] renderPng(String value, int sizePx){
+        try {
+            BitMatrix matrix = new QRCodeWriter().encode(value, BarcodeFormat.QR_CODE, sizePx, sizePx);
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            MatrixToImageWriter.writeToStream(matrix, "PNG", out);
+            return out.toByteArray();
+        } catch(Exception e){
+            throw new IllegalStateException("Unable to render QR code image", e);
+        }
     }
 
     /** Produces a URL-safe, 256-bit random credential string. */
