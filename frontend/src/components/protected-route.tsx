@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import { useAuth } from "react-oidc-context";
+import { useAuth } from "@/lib/auth";
 import { Navigate, useLocation } from "react-router";
 import Wordmark from "./wordmark";
 import Ornament from "./ornament";

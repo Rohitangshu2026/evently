@@ -10,7 +10,7 @@ import {
 import { AlertCircle, Check, RotateCw, X } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { validateTicket } from "@/lib/api";
-import { useAuth } from "react-oidc-context";
+import { useAuth } from "@/lib/auth";
 
 const DashboardValidateQrPage: React.FC = () => {
   const { user } = useAuth();

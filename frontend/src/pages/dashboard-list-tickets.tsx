@@ -5,7 +5,7 @@ import { SpringBootPagination, TicketSummary } from "@/domain/domain";
 import { listTickets } from "@/lib/api";
 import { AlertCircle, ArrowUpRight, Ticket } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useAuth } from "react-oidc-context";
+import { useAuth } from "@/lib/auth";
 import { Link } from "react-router";
 import Ornament from "@/components/ornament";
 

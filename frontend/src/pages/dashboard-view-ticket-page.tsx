@@ -5,7 +5,7 @@ import { getTicket, getTicketQr } from "@/lib/api";
 import { format } from "date-fns";
 import { Calendar, MapPin } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useAuth } from "react-oidc-context";
+import { useAuth } from "@/lib/auth";
 import { useParams } from "react-router";
 import { cn } from "@/lib/utils";
 

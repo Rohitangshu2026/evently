@@ -16,7 +16,7 @@ import {
   User,
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useAuth } from "react-oidc-context";
+import { useAuth } from "@/lib/auth";
 import { useNavigate, useParams } from "react-router";
 import PublicNav from "@/components/public-nav";
 import Ornament from "@/components/ornament";

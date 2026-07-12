@@ -29,7 +29,7 @@ import {
   Trash,
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useAuth } from "react-oidc-context";
+import { useAuth } from "@/lib/auth";
 import { Link } from "react-router";
 import { cn } from "@/lib/utils";
 import Ornament from "@/components/ornament";

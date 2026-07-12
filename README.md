@@ -17,7 +17,7 @@ Built as a **React SPA** over a **Spring Boot REST API** on **PostgreSQL**, with
 | QR code generation & retrieval | ✅ done + round-trip decode test |
 | Staff ticket validation (admit-once, concurrent-scan safe) | ✅ done + race-tested |
 | OpenAPI spec, request-id logging, Prometheus metrics | ✅ done |
-| Frontend (React 19 + Vite + Tailwind + Radix) | ✅ built — login flow to be rewired from OIDC to this API's auth |
+| Frontend (React 19 + Vite + Tailwind + Radix) | ✅ done — signs in against this API (in-memory access token, cookie-based session restore) |
 
 16 integration tests run against real PostgreSQL via `mvn verify`. Design rationale for every non-obvious choice lives in [`DECISIONS.md`](DECISIONS.md).
 
@@ -464,7 +464,7 @@ evently/
 4. **QR codes** — ZXing PNG generation, owner-scoped retrieval
 5. **Staff validation** — atomic status transition, idempotent re-scans, audit trail
 6. **Hardening** — OpenAPI spec, request-ID structured logging, Prometheus metrics
-7. **Frontend auth rewrite** — replace the OIDC client with this API's login/refresh flow
+7. ~~**Frontend auth rewrite**~~ — done: the SPA signs in against this API directly (custom `AuthProvider`, access token in memory, silent refresh, session restore via the httpOnly cookie)
 
 ## License
 

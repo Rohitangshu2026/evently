@@ -1,4 +1,4 @@
-import { useAuth } from "react-oidc-context";
+import { useAuth } from "@/lib/auth";
 import { Avatar, AvatarFallback } from "./ui/avatar";
 import {
   DropdownMenu,
