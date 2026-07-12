@@ -4,22 +4,22 @@ A full-stack event ticketing platform — organizers create events and ticket ti
 
 Built as a **React SPA** over a **Spring Boot REST API** on **PostgreSQL**, with **authentication implemented from scratch** (no Keycloak / no managed IdP): Ed25519-signed JWT access tokens, rotating refresh tokens with reuse detection, and Argon2id password hashing.
 
-## Project status
+## What it does
 
-| Capability | Status |
-|---|---|
-| Project scaffold, Dockerized Postgres, Flyway | ✅ done |
-| Domain model (8 entities), schema migrations, repositories | ✅ done |
-| Custom JWT auth (signup/login/refresh/logout/me, RBAC, rate limiting) | ✅ done + integration-tested |
-| Event management (organizer CRUD, tier reconciliation) | ✅ done + integration-tested |
-| Published events (public browse + search) | ✅ done + integration-tested |
-| Concurrency-safe ticket purchase (pessimistic locking + idempotency keys) | ✅ done — **k6-proven: 200 buyers / 50 seats → exactly 50 sold** |
-| QR code generation & retrieval | ✅ done + round-trip decode test |
-| Staff ticket validation (admit-once, concurrent-scan safe) | ✅ done + race-tested |
-| OpenAPI spec, request-id logging, Prometheus metrics | ✅ done |
-| Frontend (React 19 + Vite + Tailwind + Radix) | ✅ done — signs in against this API (in-memory access token, cookie-based session restore) |
+Evently covers the full lifecycle of an event ticket, across three roles:
 
-16 integration tests run against real PostgreSQL via `mvn verify`. Design rationale for every non-obvious choice lives in [`DECISIONS.md`](DECISIONS.md).
+- **Organizers** create events with multiple admission tiers (name, price, description, optional capacity), edit them with the tier set reconciled in place (update / add / remove in one request), and control visibility through a draft → published → cancelled/completed lifecycle. Every operation is scoped to the owning organizer — someone else's event id behaves as not-found.
+- **Attendees** browse and search published events (case-insensitive, across name and venue), buy tickets, and carry each ticket's QR code — rendered on demand from an opaque 256-bit credential that reveals nothing about the ticket itself.
+- **Staff** validate tickets at the door by QR scan or manual entry. A ticket admits exactly once: the first scan consumes its credential, repeat scans answer `EXPIRED`, forged or mistyped values answer `INVALID`, and every attempt against a real ticket lands in an audit trail.
+
+The engineering highlights:
+
+- **Oversell-safe purchasing** — the tier row is locked (`SELECT … FOR UPDATE`) before the capacity check, so concurrent buyers serialize per tier while different tiers sell in parallel. A k6 load test of **200 concurrent buyers against 50 seats settles at exactly 50 sales** ([results committed](backend/loadtest/results.md)).
+- **Idempotent purchases** — an `Idempotency-Key` header maps retries back to the original ticket, so a client that times out and retries can never buy twice.
+- **Authentication built from scratch** — Ed25519-signed JWT access tokens, rotating refresh tokens with reuse detection, Argon2id password hashing, per-IP rate limiting, and timing-equalized login responses.
+- **Tested against the real thing** — 16 integration tests run against real PostgreSQL (never H2) via `mvn verify`, including two multi-threaded race tests for the purchase and validation paths. The API ships an [OpenAPI spec](backend/openapi.json), request-id-correlated logs, and Prometheus metrics.
+
+Design rationale for every non-obvious choice lives in [`DECISIONS.md`](DECISIONS.md).
 
 ---
 
@@ -76,9 +76,17 @@ backend/src/main/java/com/evently/
 │   ├── RefreshTokenRevoker     family revocation in REQUIRES_NEW transaction
 │   ├── RateLimitFilter         Bucket4j per-IP throttle on login/signup
 │   └── AuthPrincipal           record placed in the SecurityContext
-├── service/                    Business logic (auth/ today; events, tickets… next)
+├── observability/              RequestIdFilter (X-Request-Id ↔ logging MDC)
+├── service/                    Business logic
+│   ├── auth/                   AuthService (signup/login/refresh/logout)
+│   ├── EventService            organizer CRUD + tier reconciliation
+│   ├── PublishedEventService   public browse & search
+│   ├── TicketPurchaseService   locked, idempotent purchase path
+│   ├── TicketService           owner-scoped tickets + QR retrieval
+│   ├── TicketValidationService admit-once gate validation
+│   └── QrCodeService           credential generation + PNG rendering
 └── web/                        HTTP layer
-    ├── AuthController          /api/v1/auth/**
+    ├── controllers             auth, events, published-events, tickets, validations
     ├── dto/                    Request/response records (bean-validated)
     └── error/                  ApiException hierarchy + GlobalExceptionHandler
 ```
@@ -348,25 +356,25 @@ Entry validation reuses the same discipline: the QR credential row is read `FOR 
 
 Base path `/api/v1`. 🔒 = requires Bearer token; role in brackets.
 
-| Method & path | Purpose | Status |
-|---|---|---|
-| `POST /auth/signup` | Register + authenticate | ✅ |
-| `POST /auth/login` | Authenticate | ✅ |
-| `POST /auth/refresh` | Rotate refresh cookie, new access token | ✅ |
-| `POST /auth/logout` | Revoke session family, clear cookie | ✅ |
-| `GET /auth/me` 🔒 | Current user profile | ✅ |
-| `POST /events` 🔒 [ORGANIZER] | Create event with ticket types | ✅ |
-| `GET /events` 🔒 [ORGANIZER] | List own events (paged) | ✅ |
-| `GET /events/{id}` 🔒 [ORGANIZER] | Event details | ✅ |
-| `PUT /events/{id}` 🔒 [ORGANIZER] | Update event (optimistic-locked) | ✅ |
-| `DELETE /events/{id}` 🔒 [ORGANIZER] | Delete event | ✅ |
-| `GET /published-events?q=&page=&size=` | Public browse/search | ✅ |
-| `GET /published-events/{id}` | Public event details | ✅ |
-| `POST /events/{eid}/ticket-types/{tid}/tickets` 🔒 [ATTENDEE] | Purchase (idempotent, oversell-safe) | ✅ |
-| `GET /tickets` 🔒 [ATTENDEE] | Own tickets (paged) | ✅ |
-| `GET /tickets/{id}` 🔒 [ATTENDEE] | Ticket details | ✅ |
-| `GET /tickets/{id}/qr-codes` 🔒 [ATTENDEE] | QR code as `image/png` | ✅ |
-| `POST /ticket-validations` 🔒 [STAFF] | Validate a scanned/entered ticket | ✅ |
+| Method & path | Purpose |
+|---|---|
+| `POST /auth/signup` | Register + authenticate |
+| `POST /auth/login` | Authenticate |
+| `POST /auth/refresh` | Rotate refresh cookie, new access token |
+| `POST /auth/logout` | Revoke session family, clear cookie |
+| `GET /auth/me` 🔒 | Current user profile |
+| `POST /events` 🔒 [ORGANIZER] | Create event with ticket types |
+| `GET /events` 🔒 [ORGANIZER] | List own events (paged) |
+| `GET /events/{id}` 🔒 [ORGANIZER] | Event details |
+| `PUT /events/{id}` 🔒 [ORGANIZER] | Update event (optimistic-locked) |
+| `DELETE /events/{id}` 🔒 [ORGANIZER] | Delete event |
+| `GET /published-events?q=&page=&size=` | Public browse/search |
+| `GET /published-events/{id}` | Public event details |
+| `POST /events/{eid}/ticket-types/{tid}/tickets` 🔒 [ATTENDEE] | Purchase (idempotent, oversell-safe) |
+| `GET /tickets` 🔒 [ATTENDEE] | Own tickets (paged) |
+| `GET /tickets/{id}` 🔒 [ATTENDEE] | Ticket details |
+| `GET /tickets/{id}/qr-codes` 🔒 [ATTENDEE] | QR code as `image/png` |
+| `POST /ticket-validations` 🔒 [STAFF] | Validate a scanned/entered ticket |
 
 Pagination responses use Spring Data's `Page<T>` JSON shape. All errors, from any layer, are `{ "error": string }` with conventional status codes (`400` validation, `401` unauthenticated, `403` forbidden, `404` not found, `409` conflict, `429` throttled, `500` unexpected).
 
@@ -440,8 +448,8 @@ docker exec evently-postgres psql -U evently -d evently -c "CREATE DATABASE even
 | Store only SHA-256 of refresh tokens | store raw | DB leak alone can't hijack sessions |
 | Flyway migrations, `ddl-auto=validate` | `ddl-auto=update` | Reviewable, versioned schema; drift fails fast at boot |
 | `BigDecimal` for money | `Double` | Exact decimal arithmetic; floats corrupt currency math |
-| Pessimistic lock for purchase (planned) | optimistic + retry, Redis lock, `SERIALIZABLE` | Short critical section on a single hot row; simplest correct tool, no retry storms |
-| Idempotency keys on purchase (planned) | none | Network retries must not double-charge; DB unique constraint enforces it |
+| Pessimistic lock for purchase | optimistic + retry, Redis lock, `SERIALIZABLE` | Short critical section on a single hot row; simplest correct tool, no retry storms |
+| Idempotency keys on purchase | none | Network retries must not double-charge; DB unique constraint enforces it |
 | Real Postgres in integration tests | H2 in-memory | H2 doesn't faithfully emulate Postgres locking/dialect — tests would lie |
 
 A deliberate demo simplification: signup lets a user pick any role. A production system would restrict `STAFF`/`ORGANIZER` provisioning to invitations.
@@ -455,16 +463,6 @@ evently/
 ├── compose.yaml   Local infrastructure: PostgreSQL 16
 └── README.md      ← you are here
 ```
-
-## Roadmap
-
-1. **Event management** — organizer CRUD with MapStruct DTO mapping *(in progress)*
-2. **Published events** — public browse + case-insensitive search
-3. **Ticket purchase** — pessimistic locking + idempotency keys, proven by a k6 load test (200 buyers / 50 seats → exactly 50 sold) and a concurrent integration test
-4. **QR codes** — ZXing PNG generation, owner-scoped retrieval
-5. **Staff validation** — atomic status transition, idempotent re-scans, audit trail
-6. **Hardening** — OpenAPI spec, request-ID structured logging, Prometheus metrics
-7. ~~**Frontend auth rewrite**~~ — done: the SPA signs in against this API directly (custom `AuthProvider`, access token in memory, silent refresh, session restore via the httpOnly cookie)
 
 ## License
 
