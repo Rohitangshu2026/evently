@@ -50,6 +50,13 @@ management:
 server:
   port: 8080
 
+# Every log line carries the per-request correlation id set by RequestIdFilter.
+# Production would swap the console pattern for a JSON encoder; the MDC key
+# stays the same either way.
+logging:
+  pattern:
+    level: "%5p [rid=%X{requestId:-}]"
+
 springdoc:
   swagger-ui:
     path: /swagger-ui.html

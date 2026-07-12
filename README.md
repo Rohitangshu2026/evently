@@ -9,15 +9,17 @@ Built as a **React SPA** over a **Spring Boot REST API** on **PostgreSQL**, with
 | Capability | Status |
 |---|---|
 | Project scaffold, Dockerized Postgres, Flyway | ✅ done |
-| Domain model (8 entities), schema `V1`, repositories | ✅ done |
+| Domain model (8 entities), schema migrations, repositories | ✅ done |
 | Custom JWT auth (signup/login/refresh/logout/me, RBAC, rate limiting) | ✅ done + integration-tested |
-| Event management (organizer CRUD) | 🔄 in progress |
-| Published events (public browse + search) | ⏳ planned |
-| Concurrency-safe ticket purchase (pessimistic locking + idempotency keys) | ⏳ planned |
-| QR code generation & retrieval | ⏳ planned |
-| Staff ticket validation | ⏳ planned |
-| OpenAPI docs, structured logging, load-test proof | ⏳ planned |
+| Event management (organizer CRUD, tier reconciliation) | ✅ done + integration-tested |
+| Published events (public browse + search) | ✅ done + integration-tested |
+| Concurrency-safe ticket purchase (pessimistic locking + idempotency keys) | ✅ done — **k6-proven: 200 buyers / 50 seats → exactly 50 sold** |
+| QR code generation & retrieval | ✅ done + round-trip decode test |
+| Staff ticket validation (admit-once, concurrent-scan safe) | ✅ done + race-tested |
+| OpenAPI spec, request-id logging, Prometheus metrics | ✅ done |
 | Frontend (React 19 + Vite + Tailwind + Radix) | ✅ built — login flow to be rewired from OIDC to this API's auth |
+
+16 integration tests run against real PostgreSQL via `mvn verify`. Design rationale for every non-obvious choice lives in [`DECISIONS.md`](DECISIONS.md).
 
 ---
 
@@ -306,7 +308,7 @@ sequenceDiagram
 
 ---
 
-## Ticket purchase design (planned — next milestone)
+## Ticket purchase design
 
 The purchase endpoint is the system's contention hotspot: many buyers, finite inventory, and "sell exactly `totalAvailable` tickets, never more" as a hard invariant.
 
@@ -333,7 +335,12 @@ sequenceDiagram
     end
 ```
 
-The row lock (`PESSIMISTIC_WRITE`) makes the *check-then-insert* atomic; competing transactions queue on the lock instead of double-selling. The plan includes a k6 load test (200 concurrent buyers vs. 50 seats → exactly 50 sales) and a `CountDownLatch` integration test to prove the invariant.
+The row lock (`PESSIMISTIC_WRITE`) makes the *check-then-insert* atomic; competing transactions queue on the lock instead of double-selling. The invariant is proven two ways:
+
+- **Integration test** — [`PurchaseConcurrencyIT`](backend/src/test/java/com/evently/service/PurchaseConcurrencyIT.java) races 50 latch-released threads against a 10-seat tier: exactly 10 succeed.
+- **Load test** — a [k6 run](backend/loadtest/purchase.js) of **200 concurrent buyers against 50 seats settled at exactly 50 × 201 / 150 × 409 / 0 errors**, p95 latency 413ms with every request queuing on a single row lock. Raw output is committed in [`backend/loadtest/results.md`](backend/loadtest/results.md), cross-checked against the server's own `evently_tickets_purchased_total` counter.
+
+Entry validation reuses the same discipline: the QR credential row is read `FOR UPDATE`, so two gates scanning one ticket simultaneously admit exactly once (also race-tested).
 
 ---
 
@@ -348,18 +355,18 @@ Base path `/api/v1`. 🔒 = requires Bearer token; role in brackets.
 | `POST /auth/refresh` | Rotate refresh cookie, new access token | ✅ |
 | `POST /auth/logout` | Revoke session family, clear cookie | ✅ |
 | `GET /auth/me` 🔒 | Current user profile | ✅ |
-| `POST /events` 🔒 [ORGANIZER] | Create event with ticket types | 🔄 |
-| `GET /events` 🔒 [ORGANIZER] | List own events (paged) | 🔄 |
-| `GET /events/{id}` 🔒 [ORGANIZER] | Event details | 🔄 |
-| `PUT /events/{id}` 🔒 [ORGANIZER] | Update event (optimistic-locked) | 🔄 |
-| `DELETE /events/{id}` 🔒 [ORGANIZER] | Delete event | 🔄 |
-| `GET /published-events?q=&page=&size=` | Public browse/search | ⏳ |
-| `GET /published-events/{id}` | Public event details | ⏳ |
-| `POST /events/{eid}/ticket-types/{tid}/tickets` 🔒 [ATTENDEE] | Purchase (idempotent, oversell-safe) | ⏳ |
-| `GET /tickets` 🔒 [ATTENDEE] | Own tickets (paged) | ⏳ |
-| `GET /tickets/{id}` 🔒 [ATTENDEE] | Ticket details | ⏳ |
-| `GET /tickets/{id}/qr-codes` 🔒 [ATTENDEE] | QR code as `image/png` | ⏳ |
-| `POST /ticket-validations` 🔒 [STAFF] | Validate a scanned/entered ticket | ⏳ |
+| `POST /events` 🔒 [ORGANIZER] | Create event with ticket types | ✅ |
+| `GET /events` 🔒 [ORGANIZER] | List own events (paged) | ✅ |
+| `GET /events/{id}` 🔒 [ORGANIZER] | Event details | ✅ |
+| `PUT /events/{id}` 🔒 [ORGANIZER] | Update event (optimistic-locked) | ✅ |
+| `DELETE /events/{id}` 🔒 [ORGANIZER] | Delete event | ✅ |
+| `GET /published-events?q=&page=&size=` | Public browse/search | ✅ |
+| `GET /published-events/{id}` | Public event details | ✅ |
+| `POST /events/{eid}/ticket-types/{tid}/tickets` 🔒 [ATTENDEE] | Purchase (idempotent, oversell-safe) | ✅ |
+| `GET /tickets` 🔒 [ATTENDEE] | Own tickets (paged) | ✅ |
+| `GET /tickets/{id}` 🔒 [ATTENDEE] | Ticket details | ✅ |
+| `GET /tickets/{id}/qr-codes` 🔒 [ATTENDEE] | QR code as `image/png` | ✅ |
+| `POST /ticket-validations` 🔒 [STAFF] | Validate a scanned/entered ticket | ✅ |
 
 Pagination responses use Spring Data's `Page<T>` JSON shape. All errors, from any layer, are `{ "error": string }` with conventional status codes (`400` validation, `401` unauthenticated, `403` forbidden, `404` not found, `409` conflict, `429` throttled, `500` unexpected).
 

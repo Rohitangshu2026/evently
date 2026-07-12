@@ -1,0 +1,1308 @@
+{
+    "openapi": "3.0.1",
+    "info": {
+        "title": "Evently API",
+        "description": "Event ticketing REST API: organizer event management, public event discovery, oversell-safe ticket purchase, and staff entry validation.",
+        "version": "v1"
+    },
+    "servers": [
+        {
+            "url": "http://localhost:8080",
+            "description": "Generated server url"
+        }
+    ],
+    "security": [
+        {
+            "bearerAuth": []
+        }
+    ],
+    "paths": {
+        "/api/v1/events/{id}": {
+            "get": {
+                "tags": [
+                    "event-controller"
+                ],
+                "operationId": "get_2",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/EventDetailsResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "event-controller"
+                ],
+                "operationId": "update",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateEventRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/EventDetailsResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "event-controller"
+                ],
+                "operationId": "delete",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
+        },
+        "/api/v1/ticket-validations": {
+            "post": {
+                "tags": [
+                    "ticket-validation-controller"
+                ],
+                "operationId": "validate",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TicketValidationRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TicketValidationResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/events": {
+            "get": {
+                "tags": [
+                    "event-controller"
+                ],
+                "operationId": "list_2",
+                "parameters": [
+                    {
+                        "name": "pageable",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/components/schemas/Pageable"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PageEventSummaryResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "event-controller"
+                ],
+                "operationId": "create",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CreateEventRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/EventDetailsResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/events/{eventId}/ticket-types/{ticketTypeId}/tickets": {
+            "post": {
+                "tags": [
+                    "ticket-purchase-controller"
+                ],
+                "operationId": "purchase",
+                "parameters": [
+                    {
+                        "name": "eventId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "ticketTypeId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "Idempotency-Key",
+                        "in": "header",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PurchaseTicketResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/signup": {
+            "post": {
+                "tags": [
+                    "auth-controller"
+                ],
+                "operationId": "signup",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SignupRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AuthResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/refresh": {
+            "post": {
+                "tags": [
+                    "auth-controller"
+                ],
+                "operationId": "refresh",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AuthResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/logout": {
+            "post": {
+                "tags": [
+                    "auth-controller"
+                ],
+                "operationId": "logout",
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/login": {
+            "post": {
+                "tags": [
+                    "auth-controller"
+                ],
+                "operationId": "login",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/LoginRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AuthResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/tickets": {
+            "get": {
+                "tags": [
+                    "ticket-controller"
+                ],
+                "operationId": "list",
+                "parameters": [
+                    {
+                        "name": "pageable",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/components/schemas/Pageable"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PageTicketSummaryResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/tickets/{id}": {
+            "get": {
+                "tags": [
+                    "ticket-controller"
+                ],
+                "operationId": "get",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TicketDetailsResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/tickets/{id}/qr-codes": {
+            "get": {
+                "tags": [
+                    "ticket-controller"
+                ],
+                "operationId": "qrCode",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "image/png": {
+                                "schema": {
+                                    "type": "string",
+                                    "format": "byte"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/published-events": {
+            "get": {
+                "tags": [
+                    "published-event-controller"
+                ],
+                "operationId": "list_1",
+                "parameters": [
+                    {
+                        "name": "q",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "pageable",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/components/schemas/Pageable"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PagePublishedEventSummaryResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/published-events/{id}": {
+            "get": {
+                "tags": [
+                    "published-event-controller"
+                ],
+                "operationId": "get_1",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PublishedEventDetailsResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/me": {
+            "get": {
+                "tags": [
+                    "auth-controller"
+                ],
+                "operationId": "me",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UserResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "UpdateEventRequest": {
+                "required": [
+                    "id",
+                    "name",
+                    "status",
+                    "ticketTypes",
+                    "venue"
+                ],
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "start": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "end": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "venue": {
+                        "type": "string"
+                    },
+                    "salesStart": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "salesEnd": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "DRAFT",
+                            "PUBLISHED",
+                            "CANCELLED",
+                            "COMPLETED"
+                        ]
+                    },
+                    "ticketTypes": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/UpdateTicketTypeRequest"
+                        }
+                    }
+                }
+            },
+            "UpdateTicketTypeRequest": {
+                "required": [
+                    "description",
+                    "name",
+                    "price"
+                ],
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "price": {
+                        "type": "number"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "totalAvailable": {
+                        "type": "integer",
+                        "format": "int32"
+                    }
+                }
+            },
+            "EventDetailsResponse": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "start": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "end": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "venue": {
+                        "type": "string"
+                    },
+                    "salesStart": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "salesEnd": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "DRAFT",
+                            "PUBLISHED",
+                            "CANCELLED",
+                            "COMPLETED"
+                        ]
+                    },
+                    "ticketTypes": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/TicketTypeResponse"
+                        }
+                    },
+                    "createdAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updatedAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                }
+            },
+            "TicketTypeResponse": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "price": {
+                        "type": "number"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "totalAvailable": {
+                        "type": "integer",
+                        "format": "int32"
+                    }
+                }
+            },
+            "TicketValidationRequest": {
+                "required": [
+                    "id",
+                    "method"
+                ],
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "method": {
+                        "type": "string",
+                        "enum": [
+                            "QR_SCAN",
+                            "MANUAL"
+                        ]
+                    }
+                }
+            },
+            "TicketValidationResponse": {
+                "type": "object",
+                "properties": {
+                    "ticketId": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "VALID",
+                            "INVALID",
+                            "EXPIRED"
+                        ]
+                    }
+                }
+            },
+            "CreateEventRequest": {
+                "required": [
+                    "name",
+                    "status",
+                    "ticketTypes",
+                    "venue"
+                ],
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "start": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "end": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "venue": {
+                        "type": "string"
+                    },
+                    "salesStart": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "salesEnd": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "DRAFT",
+                            "PUBLISHED",
+                            "CANCELLED",
+                            "COMPLETED"
+                        ]
+                    },
+                    "ticketTypes": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/CreateTicketTypeRequest"
+                        }
+                    }
+                }
+            },
+            "CreateTicketTypeRequest": {
+                "required": [
+                    "description",
+                    "name",
+                    "price"
+                ],
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "price": {
+                        "type": "number"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "totalAvailable": {
+                        "type": "integer",
+                        "format": "int32"
+                    }
+                }
+            },
+            "PurchaseTicketResponse": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "PURCHASED",
+                            "CANCELLED"
+                        ]
+                    }
+                }
+            },
+            "SignupRequest": {
+                "required": [
+                    "email",
+                    "name",
+                    "password",
+                    "role"
+                ],
+                "type": "object",
+                "properties": {
+                    "email": {
+                        "type": "string"
+                    },
+                    "password": {
+                        "maxLength": 100,
+                        "minLength": 8,
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "role": {
+                        "type": "string",
+                        "enum": [
+                            "ORGANIZER",
+                            "ATTENDEE",
+                            "STAFF"
+                        ]
+                    }
+                }
+            },
+            "AuthResponse": {
+                "type": "object",
+                "properties": {
+                    "accessToken": {
+                        "type": "string"
+                    },
+                    "tokenType": {
+                        "type": "string"
+                    },
+                    "expiresIn": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "user": {
+                        "$ref": "#/components/schemas/UserResponse"
+                    }
+                }
+            },
+            "UserResponse": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "email": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "roles": {
+                        "uniqueItems": true,
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "enum": [
+                                "ORGANIZER",
+                                "ATTENDEE",
+                                "STAFF"
+                            ]
+                        }
+                    }
+                }
+            },
+            "LoginRequest": {
+                "required": [
+                    "email",
+                    "password"
+                ],
+                "type": "object",
+                "properties": {
+                    "email": {
+                        "type": "string"
+                    },
+                    "password": {
+                        "type": "string"
+                    }
+                }
+            },
+            "Pageable": {
+                "type": "object",
+                "properties": {
+                    "page": {
+                        "minimum": 0,
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "size": {
+                        "minimum": 1,
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "sort": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "PageTicketSummaryResponse": {
+                "type": "object",
+                "properties": {
+                    "totalElements": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "totalPages": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "pageable": {
+                        "$ref": "#/components/schemas/PageableObject"
+                    },
+                    "numberOfElements": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "first": {
+                        "type": "boolean"
+                    },
+                    "last": {
+                        "type": "boolean"
+                    },
+                    "size": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "content": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/TicketSummaryResponse"
+                        }
+                    },
+                    "number": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "sort": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/SortObject"
+                        }
+                    },
+                    "empty": {
+                        "type": "boolean"
+                    }
+                }
+            },
+            "PageableObject": {
+                "type": "object",
+                "properties": {
+                    "pageNumber": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "pageSize": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "paged": {
+                        "type": "boolean"
+                    },
+                    "unpaged": {
+                        "type": "boolean"
+                    },
+                    "offset": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "sort": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/SortObject"
+                        }
+                    }
+                }
+            },
+            "SortObject": {
+                "type": "object",
+                "properties": {
+                    "direction": {
+                        "type": "string"
+                    },
+                    "nullHandling": {
+                        "type": "string"
+                    },
+                    "ascending": {
+                        "type": "boolean"
+                    },
+                    "property": {
+                        "type": "string"
+                    },
+                    "ignoreCase": {
+                        "type": "boolean"
+                    }
+                }
+            },
+            "TicketSummaryResponse": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "PURCHASED",
+                            "CANCELLED"
+                        ]
+                    },
+                    "ticketType": {
+                        "$ref": "#/components/schemas/TicketSummaryTicketTypeResponse"
+                    }
+                }
+            },
+            "TicketSummaryTicketTypeResponse": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "price": {
+                        "type": "number"
+                    }
+                }
+            },
+            "TicketDetailsResponse": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "PURCHASED",
+                            "CANCELLED"
+                        ]
+                    },
+                    "price": {
+                        "type": "number"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "eventName": {
+                        "type": "string"
+                    },
+                    "eventVenue": {
+                        "type": "string"
+                    },
+                    "eventStart": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "eventEnd": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                }
+            },
+            "PagePublishedEventSummaryResponse": {
+                "type": "object",
+                "properties": {
+                    "totalElements": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "totalPages": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "pageable": {
+                        "$ref": "#/components/schemas/PageableObject"
+                    },
+                    "numberOfElements": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "first": {
+                        "type": "boolean"
+                    },
+                    "last": {
+                        "type": "boolean"
+                    },
+                    "size": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "content": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/PublishedEventSummaryResponse"
+                        }
+                    },
+                    "number": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "sort": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/SortObject"
+                        }
+                    },
+                    "empty": {
+                        "type": "boolean"
+                    }
+                }
+            },
+            "PublishedEventSummaryResponse": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "start": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "end": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "venue": {
+                        "type": "string"
+                    }
+                }
+            },
+            "PublishedEventDetailsResponse": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "start": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "end": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "venue": {
+                        "type": "string"
+                    },
+                    "ticketTypes": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/PublishedEventTicketTypeResponse"
+                        }
+                    }
+                }
+            },
+            "PublishedEventTicketTypeResponse": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "price": {
+                        "type": "number"
+                    },
+                    "description": {
+                        "type": "string"
+                    }
+                }
+            },
+            "EventSummaryResponse": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "start": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "end": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "venue": {
+                        "type": "string"
+                    },
+                    "salesStart": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "salesEnd": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "DRAFT",
+                            "PUBLISHED",
+                            "CANCELLED",
+                            "COMPLETED"
+                        ]
+                    },
+                    "ticketTypes": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/TicketTypeResponse"
+                        }
+                    }
+                }
+            },
+            "PageEventSummaryResponse": {
+                "type": "object",
+                "properties": {
+                    "totalElements": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "totalPages": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "pageable": {
+                        "$ref": "#/components/schemas/PageableObject"
+                    },
+                    "numberOfElements": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "first": {
+                        "type": "boolean"
+                    },
+                    "last": {
+                        "type": "boolean"
+                    },
+                    "size": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "content": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/EventSummaryResponse"
+                        }
+                    },
+                    "number": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "sort": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/SortObject"
+                        }
+                    },
+                    "empty": {
+                        "type": "boolean"
+                    }
+                }
+            }
+        },
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "description": "Access token from /api/v1/auth/login or /signup",
+                "scheme": "bearer",
+                "bearerFormat": "JWT"
+            }
+        }
+    }
+}
