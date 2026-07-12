@@ -176,8 +176,9 @@ export interface TicketDetails {
   description: string;
   eventName: string;
   eventVenue: string;
-  eventStart: Date;
-  eventEnd: Date;
+  // Optional: events may be created without a schedule.
+  eventStart?: Date;
+  eventEnd?: Date;
 }
 
 export enum TicketValidationMethod {

@@ -119,8 +119,9 @@ const DashboardViewTicketPage: React.FC = () => {
                 <div className="flex items-center gap-3">
                   <Calendar className="h-4 w-4 text-gold" />
                   <span>
-                    {format(ticket.eventStart, "Pp")} —{" "}
-                    {format(ticket.eventEnd, "Pp")}
+                    {ticket.eventStart && ticket.eventEnd
+                      ? `${format(ticket.eventStart, "Pp")} — ${format(ticket.eventEnd, "Pp")}`
+                      : "Dates to be announced"}
                   </span>
                 </div>
               </div>
