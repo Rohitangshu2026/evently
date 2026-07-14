@@ -1,9 +1,13 @@
 package com.evently.service;
 
+import com.evently.domain.Event;
+import com.evently.domain.TicketType;
 import com.evently.domain.enums.EventStatusEnum;
 import com.evently.repo.EventRepository;
+import com.evently.repo.TicketRepository;
 import com.evently.web.dto.publishedevent.PublishedEventDetailsResponse;
 import com.evently.web.dto.publishedevent.PublishedEventSummaryResponse;
+import com.evently.web.dto.publishedevent.PublishedEventTicketTypeResponse;
 import com.evently.web.error.ResourceNotFoundException;
 import com.evently.web.mapper.PublishedEventMapper;
 import org.springframework.data.domain.Page;
@@ -11,6 +15,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -23,15 +28,19 @@ import java.util.UUID;
 public class PublishedEventService {
 
     private final EventRepository eventRepository;
+    private final TicketRepository ticketRepository;
     private final PublishedEventMapper publishedEventMapper;
 
     /**
      * @param eventRepository      event persistence (status-scoped finders)
+     * @param ticketRepository     sold-count lookups for remaining capacity
      * @param publishedEventMapper entity → public DTO mapping
      */
     public PublishedEventService(EventRepository eventRepository,
+                                 TicketRepository ticketRepository,
                                  PublishedEventMapper publishedEventMapper){
         this.eventRepository = eventRepository;
+        this.ticketRepository = ticketRepository;
         this.publishedEventMapper = publishedEventMapper;
     }
 
@@ -66,8 +75,41 @@ public class PublishedEventService {
      */
     @Transactional(readOnly = true)
     public PublishedEventDetailsResponse get(UUID eventId){
-        return eventRepository.findByIdAndStatus(eventId, EventStatusEnum.PUBLISHED)
-                .map(publishedEventMapper::toDetails)
+        Event event = eventRepository.findByIdAndStatus(eventId, EventStatusEnum.PUBLISHED)
                 .orElseThrow(() -> new ResourceNotFoundException("Event not found."));
+
+        List<PublishedEventTicketTypeResponse> tiers = event.getTicketTypes().stream()
+                .map(this::toPublicTier)
+                .toList();
+
+        return new PublishedEventDetailsResponse(
+                event.getId(),
+                event.getName(),
+                event.getStart(),
+                event.getEnd(),
+                event.getVenue(),
+                event.getOrganizer().getName(),
+                tiers);
+    }
+
+    /**
+     * Maps a tier to its public shape, computing how many admissions are still
+     * available. Unlimited tiers ({@code totalAvailable == null}) report a null
+     * remaining; otherwise remaining is capacity minus tickets already sold,
+     * floored at zero so a sold-out tier never shows a negative count.
+     */
+    private PublishedEventTicketTypeResponse toPublicTier(TicketType tier){
+        Integer remaining = null;
+        if(tier.getTotalAvailable() != null){
+            long sold = ticketRepository.countByTicketTypeId(tier.getId());
+            remaining = (int) Math.max(0, tier.getTotalAvailable() - sold);
+        }
+        return new PublishedEventTicketTypeResponse(
+                tier.getId(),
+                tier.getName(),
+                tier.getPrice(),
+                tier.getDescription(),
+                tier.getTotalAvailable(),
+                remaining);
     }
 }

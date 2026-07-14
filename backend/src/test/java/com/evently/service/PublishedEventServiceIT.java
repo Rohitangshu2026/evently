@@ -91,14 +91,18 @@ class PublishedEventServiceIT extends AbstractIntegrationTest {
     }
 
     @Test
-    void detailsExposeTiersButNotCapacity(){
+    void detailsExposeTiersOrganizerAndRemainingCapacity(){
         PublishedEventDetailsResponse details = publishedEventService.get(publishedGala.getId());
 
         assertThat(details.name()).isEqualTo(publishedGala.getName());
+        assertThat(details.organizerName()).isEqualTo("Seed Organizer");
         assertThat(details.ticketTypes()).hasSize(1);
-        assertThat(details.ticketTypes().get(0).price()).isEqualByComparingTo(new BigDecimal("25.00"));
-        // The public tier shape carries no totalAvailable — enforced at compile
-        // time by the DTO; this test documents the intent.
+
+        var tier = details.ticketTypes().get(0);
+        assertThat(tier.price()).isEqualByComparingTo(new BigDecimal("25.00"));
+        // Seeded with capacity 100 and no sales, so all 100 remain.
+        assertThat(tier.totalAvailable()).isEqualTo(100);
+        assertThat(tier.remaining()).isEqualTo(100);
     }
 
     @Test
