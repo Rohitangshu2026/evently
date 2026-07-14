@@ -6,12 +6,35 @@ import {
   PublishedEventTicketTypeDetails,
 } from "@/domain/domain";
 import { getPublishedEvent } from "@/lib/api";
-import { AlertCircle, MapPin } from "lucide-react";
+import { AlertCircle, Calendar, Clock, MapPin, User } from "lucide-react";
+import { format } from "date-fns";
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router";
 import PublicNav from "@/components/public-nav";
 import Ornament from "@/components/ornament";
 import { cn } from "@/lib/utils";
+
+/** Formats an ISO date string/Date as "October 12th, 2026", or undefined. */
+const formatDate = (value?: Date): string | undefined =>
+  value ? format(new Date(value), "PPP") : undefined;
+
+/** Formats an ISO date string/Date as "7:30 PM", or undefined. */
+const formatTime = (value?: Date): string | undefined =>
+  value ? format(new Date(value), "p") : undefined;
+
+/** Human-readable gap between start and end, e.g. "2h 30m", or undefined. */
+const durationLabel = (start?: Date, end?: Date): string | undefined => {
+  if (!start || !end) return undefined;
+  const minutes = Math.round(
+    (new Date(end).getTime() - new Date(start).getTime()) / 60000,
+  );
+  if (minutes <= 0) return undefined;
+  const hours = Math.floor(minutes / 60);
+  const mins = minutes % 60;
+  return [hours ? `${hours}h` : "", mins ? `${mins}m` : ""]
+    .filter(Boolean)
+    .join(" ");
+};
 
 const PublishedEventsPage: React.FC = () => {
   const { id } = useParams();
@@ -67,17 +90,63 @@ const PublishedEventsPage: React.FC = () => {
         {/* Header */}
         <div className="grid grid-cols-1 gap-12 md:grid-cols-12 md:items-end">
           <div className="reveal md:col-span-7">
-            <p className="eyebrow">Featured engagement</p>
+            <p className="eyebrow">Featured Event</p>
             <div className="mt-4">
               <Ornament variant="mark" />
             </div>
-            <h1 className="mt-5 font-display text-5xl leading-[1.04] text-foreground md:text-6xl">
+            <h1 className="mt-5 font-display text-4xl leading-[1.05] text-foreground md:text-5xl">
               {publishedEvent?.name}
             </h1>
-            <div className="mt-8 flex items-center gap-3 text-sm text-muted-foreground">
-              <MapPin className="h-4 w-4 text-gold" />
-              <span className="tracking-wide">{publishedEvent?.venue}</span>
-            </div>
+            <dl className="mt-8 grid grid-cols-1 gap-x-10 gap-y-4 text-sm text-foreground sm:grid-cols-2">
+              {formatDate(publishedEvent?.start) && (
+                <div className="flex items-start gap-3">
+                  <Calendar className="mt-0.5 h-4 w-4 shrink-0 text-gold" />
+                  <div>
+                    <dt className="eyebrow !text-[0.6rem]">Date</dt>
+                    <dd className="mt-1">{formatDate(publishedEvent?.start)}</dd>
+                  </div>
+                </div>
+              )}
+              {formatTime(publishedEvent?.start) && (
+                <div className="flex items-start gap-3">
+                  <Clock className="mt-0.5 h-4 w-4 shrink-0 text-gold" />
+                  <div>
+                    <dt className="eyebrow !text-[0.6rem]">Time</dt>
+                    <dd className="mt-1">
+                      {formatTime(publishedEvent?.start)}
+                      {durationLabel(
+                        publishedEvent?.start,
+                        publishedEvent?.end,
+                      ) && (
+                        <span className="text-muted-foreground">
+                          {" · "}
+                          {durationLabel(
+                            publishedEvent?.start,
+                            publishedEvent?.end,
+                          )}
+                        </span>
+                      )}
+                    </dd>
+                  </div>
+                </div>
+              )}
+              <div className="flex items-start gap-3">
+                <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-gold" />
+                <div>
+                  <dt className="eyebrow !text-[0.6rem]">Venue</dt>
+                  <dd className="mt-1">{publishedEvent?.venue}</dd>
+                </div>
+              </div>
+              {publishedEvent?.organizerName && (
+                <div className="flex items-start gap-3">
+                  <User className="mt-0.5 h-4 w-4 shrink-0 text-gold" />
+                  <div>
+                    <dt className="eyebrow !text-[0.6rem]">Hosted by</dt>
+                    <dd className="mt-1">{publishedEvent.organizerName}</dd>
+                  </div>
+                </div>
+              )}
+            </dl>
           </div>
           <div className="reveal reveal-delay-1 md:col-span-5">
             <div className="relative aspect-[4/5] overflow-hidden rounded-lg border border-border bg-card shadow-[0_30px_60px_-30px_rgba(60,40,10,0.45)]">
@@ -99,7 +168,7 @@ const PublishedEventsPage: React.FC = () => {
           <div className="md:col-span-7">
             <div className="mb-8 flex items-baseline justify-between">
               <h2 className="font-display text-3xl text-foreground">
-                Select an admission
+                Choose your ticket
               </h2>
               <span className="eyebrow">
                 {publishedEvent?.ticketTypes?.length ?? 0} options
@@ -138,6 +207,22 @@ const PublishedEventsPage: React.FC = () => {
                           <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">
                             {ticketType.description}
                           </p>
+                          {typeof ticketType.remaining === "number" && (
+                            <p
+                              className={cn(
+                                "mt-3 text-[0.68rem] uppercase tracking-[0.24em]",
+                                ticketType.remaining === 0
+                                  ? "text-destructive"
+                                  : ticketType.remaining <= 10
+                                    ? "text-gold"
+                                    : "text-muted-foreground",
+                              )}
+                            >
+                              {ticketType.remaining === 0
+                                ? "Sold out"
+                                : `${ticketType.remaining} left`}
+                            </p>
+                          )}
                         </div>
                       </div>
                       <div className="text-right">
@@ -157,7 +242,7 @@ const PublishedEventsPage: React.FC = () => {
           <aside className="md:col-span-5">
             <div className="reveal reveal-delay-1 sticky top-28 rounded-lg border border-border bg-card p-8 shadow-[0_30px_60px_-30px_rgba(60,40,10,0.4)]">
               <div className="flex items-center justify-between">
-                <p className="eyebrow">Reservation</p>
+                <p className="eyebrow">Your selection</p>
                 <Ornament variant="mark" className="opacity-80" />
               </div>
               <h3 className="mt-3 font-display text-3xl text-foreground">
@@ -173,19 +258,47 @@ const PublishedEventsPage: React.FC = () => {
                 {selectedTicketType?.description}
               </p>
 
+              {typeof selectedTicketType?.remaining === "number" && (
+                <p className="mt-4 flex items-center justify-between border-t border-border pt-4 text-sm">
+                  <span className="text-muted-foreground">Remaining</span>
+                  <span
+                    className={cn(
+                      "font-medium",
+                      selectedTicketType.remaining === 0
+                        ? "text-destructive"
+                        : "text-foreground",
+                    )}
+                  >
+                    {selectedTicketType.remaining === 0
+                      ? "Sold out"
+                      : `${selectedTicketType.remaining} seats`}
+                  </span>
+                </p>
+              )}
+
               <div className="my-8">
                 <Ornament />
               </div>
 
               <Link
                 to={`/events/${publishedEvent?.id}/purchase/${selectedTicketType?.id}`}
+                aria-disabled={selectedTicketType?.remaining === 0}
+                className={cn(
+                  selectedTicketType?.remaining === 0 &&
+                    "pointer-events-none opacity-50",
+                )}
               >
-                <Button className="h-12 w-full cursor-pointer rounded-full bg-ink text-[0.74rem] uppercase tracking-[0.24em] text-primary-foreground hover:bg-ink/90">
-                  Reserve admission
+                <Button
+                  disabled={selectedTicketType?.remaining === 0}
+                  className="h-12 w-full cursor-pointer rounded-full bg-ink text-[0.74rem] uppercase tracking-[0.24em] text-primary-foreground hover:bg-ink/90 disabled:opacity-50"
+                >
+                  {selectedTicketType?.remaining === 0
+                    ? "Sold out"
+                    : "Continue to checkout"}
                 </Button>
               </Link>
-              <p className="mt-4 text-center text-[0.68rem] uppercase tracking-[0.28em] text-muted-foreground">
-                Secure checkout · Instant QR
+              <p className="mt-4 text-center text-[0.66rem] uppercase tracking-[0.24em] text-muted-foreground">
+                Secure payment · Instant QR · Email confirmation
               </p>
             </div>
           </aside>

@@ -9,7 +9,6 @@ import PublishedEventCard from "@/components/published-event-card";
 import { SimplePagination } from "@/components/simple-pagination";
 import PublicNav from "@/components/public-nav";
 import Ornament from "@/components/ornament";
-import Marquee from "@/components/marquee";
 
 const AttendeeLandingPage: React.FC = () => {
   const [page, setPage] = useState(0);
@@ -74,20 +73,20 @@ const AttendeeLandingPage: React.FC = () => {
       <PublicNav />
 
       {/* Hero */}
-      <section className="container mx-auto px-6 pt-20 pb-12 md:pt-28 md:pb-16">
+      <section className="container mx-auto px-6 pt-10 pb-8 md:pt-14 md:pb-10">
         <div className="mx-auto max-w-4xl text-center">
           <p className="eyebrow reveal">An invitation</p>
-          <div className="reveal reveal-delay-1 mt-5 flex justify-center">
+          <div className="reveal reveal-delay-1 mt-3 flex justify-center">
             <Ornament variant="mark" className="opacity-80" />
           </div>
-          <h1 className="reveal reveal-delay-1 mt-5 font-display text-5xl leading-[1.04] text-foreground md:text-7xl">
-            Evenings worth
+          <h1 className="reveal reveal-delay-1 mt-3 font-display text-4xl leading-[1.05] text-foreground md:text-6xl">
+            Events worth
             <br />
             <span className="italic text-gold">remembering</span>.
           </h1>
-          <p className="reveal reveal-delay-2 mx-auto mt-8 max-w-xl text-base leading-relaxed text-muted-foreground md:text-lg">
-            A curated collection of concerts, dinners, and gatherings — held in
-            rooms that linger long after the night is over.
+          <p className="reveal reveal-delay-2 mx-auto mt-6 max-w-xl text-base leading-relaxed text-muted-foreground md:text-lg">
+            Discover concerts, dinners, and gatherings near you — browse events,
+            book tickets, and carry a QR pass for the door.
           </p>
 
           <form
@@ -122,41 +121,21 @@ const AttendeeLandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* Marquee */}
-      <Marquee
-        items={[
-          "An evening, well-kept",
-          "Composed with intention",
-          "By invitation",
-          "Curated for the present hour",
-          "Tickets, refined",
-          "Rooms that linger",
-        ]}
-      />
-
       {/* Editorial intro with drop cap */}
       <section className="container mx-auto px-6 py-20">
-        <div className="mx-auto grid max-w-5xl grid-cols-1 gap-12 md:grid-cols-12">
-          <div className="md:col-span-3">
-            <p className="eyebrow">Letter from the curator</p>
-            <p className="mt-3 font-display text-sm italic text-muted-foreground">
-              No. 01 · MMXXVI
-            </p>
-          </div>
-          <div className="md:col-span-9">
-            <p className="dropcap font-display text-[1.15rem] leading-[1.9] text-foreground md:text-[1.22rem]">
-              The best evenings are not announced — they are arranged. A small
-              room, a careful guest list, a host who has thought of everything
-              and shows none of it. We keep our collection small, on purpose.
-              Each event below has been chosen for the same reason: it is worth
-              the journey, the dress, and the late hour home.
-            </p>
-            <div className="mt-8 flex items-center gap-4">
-              <span className="h-px w-12 bg-gold/60" />
-              <span className="font-display text-sm italic text-muted-foreground">
-                — Evently
-              </span>
-            </div>
+        <div className="mx-auto max-w-3xl">
+          <p className="dropcap font-display text-[1.15rem] leading-[1.9] text-foreground md:text-[1.22rem]">
+            The best evenings are not announced — they are arranged. A small
+            room, a careful guest list, a host who has thought of everything
+            and shows none of it. We keep our collection small, on purpose.
+            Each event below has been chosen for the same reason: it is worth
+            the journey, the dress, and the late hour home.
+          </p>
+          <div className="mt-8 flex items-center gap-4">
+            <span className="h-px w-12 bg-gold/60" />
+            <span className="font-display text-sm italic text-muted-foreground">
+              — Evently
+            </span>
           </div>
         </div>
       </section>
@@ -224,9 +203,6 @@ const AttendeeLandingPage: React.FC = () => {
           <Ornament className="opacity-70" />
           <div className="mt-8 flex flex-col items-center justify-between gap-4 text-[0.72rem] uppercase tracking-[0.26em] text-muted-foreground md:flex-row">
             <span>Evently · Tickets to remember</span>
-            <span className="font-display italic normal-case tracking-[0.18em]">
-              Composed with care, in low light.
-            </span>
             <span>© {new Date().getFullYear()}</span>
           </div>
         </div>

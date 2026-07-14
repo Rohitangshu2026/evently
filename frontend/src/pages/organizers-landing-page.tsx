@@ -1,21 +1,24 @@
 import { Button } from "@/components/ui/button";
 import PublicNav from "@/components/public-nav";
 import Ornament from "@/components/ornament";
-import Marquee from "@/components/marquee";
+import { CalendarPlus, QrCode, Ticket } from "lucide-react";
 import { useNavigate } from "react-router";
 
 const features = [
   {
+    icon: CalendarPlus,
     title: "Effortless creation",
-    body: "From single salons to multi-night residencies — compose every detail with a quiet, considered editor.",
+    body: "Create events with schedules, venues, and multiple pricing tiers in a clean, focused editor.",
   },
   {
+    icon: Ticket,
     title: "Refined ticketing",
-    body: "Tiered admissions, sales windows, capacity controls. The mechanics of an evening, handled with grace.",
+    body: "Set capacity per tier, open and close sales windows, and track what's sold — no overselling, ever.",
   },
   {
+    icon: QrCode,
     title: "Doorside discretion",
-    body: "Validate guests at the door with secure QR scans. Fast, silent, certain.",
+    body: "Scan QR passes at entry for instant, tamper-proof validation. Each ticket admits exactly once.",
   },
 ];
 
@@ -28,21 +31,21 @@ const OrganizersLandingPage: React.FC = () => {
 
       <main className="container mx-auto px-6">
         {/* Hero */}
-        <section className="grid grid-cols-1 items-center gap-16 py-20 md:grid-cols-2 md:py-28">
-          <div className="space-y-7">
+        <section className="grid grid-cols-1 items-center gap-12 py-12 md:grid-cols-2 md:py-16">
+          <div className="space-y-6">
             <p className="eyebrow reveal">For organizers & hosts</p>
             <div className="reveal reveal-delay-1">
               <Ornament variant="mark" />
             </div>
-            <h1 className="reveal reveal-delay-1 font-display text-5xl leading-[1.04] text-foreground md:text-6xl">
-              Stage gatherings
+            <h1 className="reveal reveal-delay-1 font-display text-4xl leading-[1.05] text-foreground md:text-5xl">
+              Create events people
               <br />
-              <span className="italic text-gold">guests remember</span>.
+              <span className="italic text-gold">remember</span>.
             </h1>
             <p className="reveal reveal-delay-2 max-w-md text-base leading-relaxed text-muted-foreground md:text-lg">
-              A patient, well-mannered platform for those who plan with
-              intention. Build events, issue tickets, and welcome attendees —
-              without the noise.
+              Build event pages, set ticket tiers and capacity, sell admissions
+              online, and validate guests at the door with QR passes — all in
+              one place.
             </p>
             <div className="reveal reveal-delay-3 flex flex-wrap items-center gap-4 pt-2">
               <Button
@@ -91,17 +94,6 @@ const OrganizersLandingPage: React.FC = () => {
         </section>
       </main>
 
-      <Marquee
-        items={[
-          "Compose with intention",
-          "Welcome with grace",
-          "Sell with restraint",
-          "Validate with certainty",
-          "Steward the evening",
-          "Refined ticketing",
-        ]}
-      />
-
       <main className="container mx-auto px-6">
         <div className="py-12">
           <Ornament />
@@ -116,23 +108,31 @@ const OrganizersLandingPage: React.FC = () => {
             </h2>
           </div>
           <div className="grid grid-cols-1 gap-12 md:grid-cols-3">
-            {features.map((f, i) => (
-              <article
-                key={f.title}
-                className="reveal group relative space-y-4 border-t border-border pt-8"
-                style={{ animationDelay: `${i * 120}ms` }}
-              >
-                <span className="font-display text-sm italic tracking-[0.2em] text-gold">
-                  Chapter {String(i + 1).padStart(2, "0")}
-                </span>
-                <h3 className="font-display text-2xl text-foreground transition-colors group-hover:text-gold">
-                  {f.title}
-                </h3>
-                <p className="text-sm leading-relaxed text-muted-foreground">
-                  {f.body}
-                </p>
-              </article>
-            ))}
+            {features.map((f, i) => {
+              const Icon = f.icon;
+              return (
+                <article
+                  key={f.title}
+                  className="reveal group relative space-y-4 border-t border-border pt-8"
+                  style={{ animationDelay: `${i * 120}ms` }}
+                >
+                  <Icon
+                    className="h-6 w-6 text-gold"
+                    strokeWidth={1.5}
+                    aria-hidden
+                  />
+                  <span className="block font-display text-sm italic tracking-[0.2em] text-gold">
+                    Chapter {String(i + 1).padStart(2, "0")}
+                  </span>
+                  <h3 className="font-display text-2xl text-foreground transition-colors group-hover:text-gold">
+                    {f.title}
+                  </h3>
+                  <p className="text-sm leading-relaxed text-muted-foreground">
+                    {f.body}
+                  </p>
+                </article>
+              );
+            })}
           </div>
         </section>
 
@@ -142,16 +142,16 @@ const OrganizersLandingPage: React.FC = () => {
 
         {/* CTA */}
         <section className="py-20 text-center">
-          <p className="eyebrow">When you are ready</p>
+          <p className="eyebrow">Ready when you are</p>
           <h2 className="mx-auto mt-6 max-w-3xl font-display text-4xl text-foreground md:text-5xl">
-            Begin with a single,{" "}
-            <span className="italic text-gold">considered</span> evening.
+            Host your next event.{" "}
+            <span className="italic text-gold">Create it in minutes.</span>
           </h2>
           <Button
             className="mt-10 h-12 cursor-pointer rounded-full bg-ink px-8 text-[0.74rem] uppercase tracking-[0.24em] text-primary-foreground hover:bg-ink/90"
             onClick={() => navigate("/dashboard/events")}
           >
-            Open the studio
+            Create an event
           </Button>
         </section>
       </main>

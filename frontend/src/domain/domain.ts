@@ -141,6 +141,9 @@ export interface PublishedEventTicketTypeDetails {
   name: string;
   price: number;
   description: string;
+  // Optional: null for tiers with unlimited capacity.
+  totalAvailable?: number;
+  remaining?: number;
 }
 
 export interface PublishedEventDetails {
@@ -149,6 +152,7 @@ export interface PublishedEventDetails {
   start?: Date;
   end?: Date;
   venue: string;
+  organizerName: string;
   ticketTypes: PublishedEventTicketTypeDetails[];
 }
 

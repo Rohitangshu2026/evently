@@ -114,7 +114,7 @@ const PurchaseTicketPage: React.FC = () => {
           <aside className="md:col-span-5">
             <div className="sticky top-28 reveal rounded-lg border border-border bg-card p-8">
               <div className="flex items-center justify-between">
-                <p className="eyebrow">Reservation</p>
+                <p className="eyebrow">Your selection</p>
                 <Ornament variant="mark" />
               </div>
               <h2 className="mt-3 font-display text-3xl text-foreground">
@@ -122,17 +122,20 @@ const PurchaseTicketPage: React.FC = () => {
               </h2>
               {event && (
                 <dl className="mt-6 space-y-3 text-sm text-muted-foreground">
+                  {event.start && (
+                    <div className="flex items-start gap-3">
+                      <Calendar className="mt-0.5 h-4 w-4 shrink-0 text-gold" />
+                      <dd>{format(new Date(event.start), "PPP · p")}</dd>
+                    </div>
+                  )}
                   <div className="flex items-start gap-3">
-                    <MapPin className="mt-0.5 h-4 w-4 text-gold" />
+                    <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-gold" />
                     <dd>{event.venue}</dd>
                   </div>
-                  {event.start && event.end && (
+                  {event.organizerName && (
                     <div className="flex items-start gap-3">
-                      <Calendar className="mt-0.5 h-4 w-4 text-gold" />
-                      <dd>
-                        {format(event.start, "PPp")} —{" "}
-                        {format(event.end, "p")}
-                      </dd>
+                      <User className="mt-0.5 h-4 w-4 shrink-0 text-gold" />
+                      <dd>Hosted by {event.organizerName}</dd>
                     </div>
                   )}
                 </dl>
@@ -223,7 +226,7 @@ const PurchaseTicketPage: React.FC = () => {
                   disabled={submitting || !ticketType}
                   className="h-12 w-full cursor-pointer rounded-full bg-ink text-[0.74rem] uppercase tracking-[0.24em] text-primary-foreground hover:bg-ink/90 disabled:opacity-50"
                 >
-                  {submitting ? "Reserving…" : "Confirm reservation"}
+                  {submitting ? "Processing…" : "Complete purchase"}
                 </Button>
                 <p className="text-center text-[0.66rem] uppercase tracking-[0.28em] text-muted-foreground">
                   Demonstration only · No payment processed

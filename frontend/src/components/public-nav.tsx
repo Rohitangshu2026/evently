@@ -7,13 +7,6 @@ interface PublicNavProps {
   dashboardPath?: string;
 }
 
-const todayLabel = () =>
-  new Date().toLocaleDateString("en-GB", {
-    weekday: "long",
-    day: "2-digit",
-    month: "long",
-  });
-
 const PublicNav: React.FC<PublicNavProps> = ({
   dashboardPath = "/dashboard",
 }) => {
@@ -22,17 +15,6 @@ const PublicNav: React.FC<PublicNavProps> = ({
 
   return (
     <header className="border-b border-border/60 bg-background/70 backdrop-blur">
-      {/* Thin upper strip */}
-      <div className="border-b border-border/60 bg-cream/40">
-        <div className="container mx-auto flex items-center justify-between px-6 py-1.5 text-[0.62rem] uppercase tracking-[0.34em] text-muted-foreground">
-          <span className="hidden md:block">By appointment & invitation</span>
-          <span className="font-display italic tracking-[0.18em] normal-case">
-            {todayLabel()}
-          </span>
-          <span className="hidden md:block">Volume MMXXVI · No. 01</span>
-        </div>
-      </div>
-
       <div className="container mx-auto flex items-center justify-between px-6 py-5">
         <Wordmark to="/" />
 
