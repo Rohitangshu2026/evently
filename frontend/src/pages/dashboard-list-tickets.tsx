@@ -1,4 +1,5 @@
 import NavBar from "@/components/nav-bar";
+import { formatInr } from "@/lib/currency";
 import { SimplePagination } from "@/components/simple-pagination";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { SpringBootPagination, TicketSummary } from "@/domain/domain";
@@ -96,7 +97,7 @@ const DashboardListTickets: React.FC = () => {
                   </span>
                   <div className="flex items-center gap-2 text-sm text-foreground">
                     <span className="font-display text-lg">
-                      ${ticketItem.ticketType.price}
+                      {formatInr(ticketItem.ticketType.price)}
                     </span>
                     <ArrowUpRight className="h-4 w-4 text-gold transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
                   </div>

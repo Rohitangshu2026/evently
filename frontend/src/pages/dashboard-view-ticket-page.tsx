@@ -1,4 +1,5 @@
 import NavBar from "@/components/nav-bar";
+import { formatInr } from "@/lib/currency";
 import Ornament from "@/components/ornament";
 import { TicketDetails, TicketStatus } from "@/domain/domain";
 import { getTicket, getTicketQr } from "@/lib/api";
@@ -188,7 +189,7 @@ const DashboardViewTicketPage: React.FC = () => {
                 <div className="text-right">
                   <dt className="eyebrow">Paid</dt>
                   <dd className="mt-1 font-display text-base text-foreground">
-                    ${ticket.price}
+                    {formatInr(ticket.price)}
                   </dd>
                 </div>
               </dl>

@@ -16,41 +16,45 @@ const AttendeeLandingPage: React.FC = () => {
     SpringBootPagination<PublishedEventSummary> | undefined
   >();
   const [error, setError] = useState<string | undefined>();
-  const [query, setQuery] = useState<string | undefined>();
-
-  useEffect(() => {
-    if (query && query.trim().length > 0) queryPublishedEvents();
-    else refreshPublishedEvents();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page]);
-
-  const refreshPublishedEvents = async () => {
-    try {
-      setError(undefined);
-      setPublishedEvents(await listPublishedEvents(page));
-    } catch (err) {
-      handleErr(err);
-    }
-  };
-
-  const queryPublishedEvents = async () => {
-    const q = (query ?? "").trim();
-    if (q.length === 0) {
-      await refreshPublishedEvents();
-      return;
-    }
-    try {
-      setError(undefined);
-      setPublishedEvents(await searchPublishedEvents(q, page));
-    } catch (err) {
-      handleErr(err);
-    }
-  };
+  // What's currently in the search box.
+  const [searchTerm, setSearchTerm] = useState("");
+  // The query actually committed (on submit) — this, plus page, drives the fetch.
+  const [submittedQuery, setSubmittedQuery] = useState("");
 
   const handleErr = (err: unknown) => {
     if (err instanceof Error) setError(err.message);
     else if (typeof err === "string") setError(err);
     else setError("An unknown error has occurred");
+  };
+
+  // A single effect owns all fetching. The `ignore` guard drops responses from
+  // a superseded request, so a slow browse can't overwrite a newer search
+  // (the race that made search look broken on the deployed site).
+  useEffect(() => {
+    let ignore = false;
+    const load = async () => {
+      try {
+        setError(undefined);
+        const trimmed = submittedQuery.trim();
+        const data =
+          trimmed.length > 0
+            ? await searchPublishedEvents(trimmed, page)
+            : await listPublishedEvents(page);
+        if (!ignore) setPublishedEvents(data);
+      } catch (err) {
+        if (!ignore) handleErr(err);
+      }
+    };
+    load();
+    return () => {
+      ignore = true;
+    };
+  }, [submittedQuery, page]);
+
+  const handleSearchSubmit = () => {
+    // Reset to the first page so a search never lands on an out-of-range page.
+    setPage(0);
+    setSubmittedQuery(searchTerm);
   };
 
   if (error) {
@@ -92,17 +96,31 @@ const AttendeeLandingPage: React.FC = () => {
           <form
             onSubmit={(e) => {
               e.preventDefault();
-              queryPublishedEvents();
+              handleSearchSubmit();
             }}
             className="reveal reveal-delay-3 mx-auto mt-12 flex max-w-xl items-center gap-2 rounded-full border border-border bg-card/85 p-1.5 shadow-[0_18px_40px_-24px_rgba(60,40,10,0.45)] backdrop-blur"
           >
             <Search className="ml-4 h-4 w-4 text-muted-foreground" />
             <Input
               className="h-10 flex-1 border-0 bg-transparent text-sm shadow-none focus-visible:ring-0"
-              placeholder="Search by artist, venue, or city…"
-              value={query ?? ""}
-              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search by event or venue…"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
             />
+            {submittedQuery && (
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => {
+                  setSearchTerm("");
+                  setPage(0);
+                  setSubmittedQuery("");
+                }}
+                className="h-10 cursor-pointer rounded-full px-4 text-[0.72rem] uppercase tracking-[0.2em] text-muted-foreground hover:text-foreground"
+              >
+                Clear
+              </Button>
+            )}
             <Button
               type="submit"
               className="h-10 cursor-pointer rounded-full bg-ink px-6 text-[0.74rem] uppercase tracking-[0.22em] text-primary-foreground hover:bg-ink/90"

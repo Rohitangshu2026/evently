@@ -1,4 +1,5 @@
 import NavBar from "@/components/nav-bar";
+import { formatInr } from "@/lib/currency";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -589,7 +590,7 @@ const DashboardManageEventPage: React.FC = () => {
                             variant="outline"
                             className="border-gold/40 bg-gold/10 font-normal text-foreground"
                           >
-                            ${ticketType.price}
+                            {formatInr(ticketType.price)}
                           </Badge>
                         </div>
                         {ticketType.totalAvailable !== undefined && (

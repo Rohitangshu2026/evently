@@ -1,4 +1,5 @@
 import RandomEventImage from "@/components/random-event-image";
+import { formatInr } from "@/lib/currency";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
@@ -228,7 +229,7 @@ const PublishedEventsPage: React.FC = () => {
                       <div className="text-right">
                         <p className="eyebrow">Per guest</p>
                         <p className="mt-1 font-display text-2xl text-foreground">
-                          ${ticketType.price}
+                          {formatInr(ticketType.price)}
                         </p>
                       </div>
                     </div>
@@ -250,7 +251,7 @@ const PublishedEventsPage: React.FC = () => {
               </h3>
               <div className="mt-6 flex items-baseline gap-2">
                 <span className="font-display text-5xl text-foreground">
-                  ${selectedTicketType?.price}
+                  {formatInr(selectedTicketType?.price)}
                 </span>
                 <span className="text-sm text-muted-foreground">/ guest</span>
               </div>

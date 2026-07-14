@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { formatInr } from "@/lib/currency";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { getPublishedEvent, purchaseTicket } from "@/lib/api";
@@ -160,7 +161,7 @@ const PurchaseTicketPage: React.FC = () => {
               <div className="mt-8 flex items-baseline justify-between border-t border-border pt-6">
                 <p className="eyebrow">Total</p>
                 <p className="font-display text-3xl text-foreground">
-                  ${ticketType?.price ?? "—"}
+                  {formatInr(ticketType?.price)}
                 </p>
               </div>
             </div>

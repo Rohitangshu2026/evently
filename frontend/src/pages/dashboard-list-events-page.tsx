@@ -1,4 +1,5 @@
 import NavBar from "@/components/nav-bar";
+import { formatInr } from "@/lib/currency";
 import { SimplePagination } from "@/components/simple-pagination";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
@@ -236,7 +237,7 @@ const DashboardListEventsPage: React.FC = () => {
                         >
                           <span>{tt.name}</span>
                           <span className="text-xs text-muted-foreground">
-                            ${tt.price}
+                            {formatInr(tt.price)}
                           </span>
                         </li>
                       ))}
